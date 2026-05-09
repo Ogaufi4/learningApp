@@ -11,18 +11,20 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-// Initialize Firebase only if API key is present
+const missingFirebaseEnv = !firebaseConfig.apiKey || !firebaseConfig.authDomain || !firebaseConfig.projectId;
+const missingFirebaseEnvMessage =
+  "Firebase auth is not configured. Add NEXT_PUBLIC_FIREBASE_API_KEY, NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN, and NEXT_PUBLIC_FIREBASE_PROJECT_ID to the frontend Vercel project.";
+
 let app;
-if (firebaseConfig.apiKey) {
+if (!missingFirebaseEnv) {
   app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 } else {
-  // During build time or if env vars are missing, we might not have the API key.
-  // We initialize with a dummy app or just export empty objects if they are handled.
-  // Note: initializeApp will throw if apiKey is missing.
-  app = !getApps().length ? initializeApp({ ...firebaseConfig, apiKey: "dummy-key" }) : getApp();
+  if (typeof window !== "undefined") {
+    console.error(missingFirebaseEnvMessage);
+  }
 }
 
-const auth = getAuth(app);
+const auth = app ? getAuth(app) : null;
 const googleProvider = new GoogleAuthProvider();
 
-export { app, auth, googleProvider };
+export { app, auth, googleProvider, missingFirebaseEnv, missingFirebaseEnvMessage };

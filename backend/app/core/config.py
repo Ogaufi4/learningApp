@@ -1,12 +1,24 @@
+import os
 from typing import List, Union
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+def _database_url_from_env() -> str:
+    return (
+        os.getenv("DATABASE_URL")
+        or os.getenv("POSTGRES_URL")
+        or os.getenv("POSTGRES_PRISMA_URL")
+        or os.getenv("POSTGRES_URL_NON_POOLING")
+        or ""
+    )
+
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Puolingo API"
     API_V1_STR: str = "/api/v1"
     VERCEL_ENV: str = ""
     
-    DATABASE_URL: str
+    DATABASE_URL: str = _database_url_from_env()
     SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
