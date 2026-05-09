@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User, LoginRequest, RegisterRequest } from '@/types/api';
 import { authApi, userApi } from '@/lib/api/auth';
-import { auth, googleProvider } from '@/lib/firebase';
+import { auth, googleProvider, missingFirebaseEnv, missingFirebaseEnvMessage } from '@/lib/firebase';
 import { 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
@@ -39,6 +39,9 @@ export const useAuthStore = create<AuthState>()(
         try {
           // 1. Try Firebase login first (for standard users)
           try {
+            if (!auth || missingFirebaseEnv) {
+              throw new Error(missingFirebaseEnvMessage);
+            }
             const userCredential = await signInWithEmailAndPassword(auth, credentials.username, credentials.password);
             const token = await userCredential.user.getIdToken();
             
@@ -74,6 +77,9 @@ export const useAuthStore = create<AuthState>()(
       register: async (data) => {
         set({ isLoading: true, error: null });
         try {
+          if (!auth || missingFirebaseEnv) {
+            throw new Error(missingFirebaseEnvMessage);
+          }
           const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
           
           if (data.full_name) {
@@ -105,6 +111,9 @@ export const useAuthStore = create<AuthState>()(
       googleLogin: async () => {
         set({ isLoading: true, error: null });
         try {
+          if (!auth || missingFirebaseEnv) {
+            throw new Error(missingFirebaseEnvMessage);
+          }
           const userCredential = await signInWithPopup(auth, googleProvider);
           const token = await userCredential.user.getIdToken();
 
@@ -128,7 +137,9 @@ export const useAuthStore = create<AuthState>()(
 
       logout: async () => {
         try {
-          await signOut(auth);
+          if (auth) {
+            await signOut(auth);
+          }
         } catch {
           // Ignore logout errors
         }
