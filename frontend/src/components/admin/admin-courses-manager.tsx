@@ -45,11 +45,20 @@ export const AdminCoursesManager = ({
     setLoading(true);
     setError(null);
     try {
-      const data = await adminApi.getCourseTree();
+      const data = await Promise.race([
+        adminApi.getCourseTree(),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("Admin course request timed out.")), 12000)
+        ),
+      ]);
       setCourses(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Failed to fetch courses", error);
-      setError("Failed to load courses. Check your admin session and backend connection.");
+      const message =
+        error instanceof Error && error.message === "Admin course request timed out."
+          ? "Loading took too long. The backend may be cold-starting or the database may be slow."
+          : "Failed to load courses. Check your admin session and backend connection.";
+      setError(message);
     } finally {
       setLoading(false);
     }
