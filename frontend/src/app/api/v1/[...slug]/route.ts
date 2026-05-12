@@ -549,6 +549,7 @@ async function handlePost(request: NextRequest, slug: string[]) {
       access_token: await createAccessToken(user.id),
       token_type: "bearer",
       refresh_token: await createRefreshToken(user.id),
+      user: serializeUser(user),
     });
   }
 

@@ -1,6 +1,7 @@
 import postgres from "postgres";
 let cachedSql: postgres.Sql | null = null;
 let schemaInitPromise: Promise<void> | null = null;
+let schemaVerified = false;
 
 export function getSql() {
   if (cachedSql) {
@@ -153,8 +154,24 @@ async function createSchema() {
 }
 
 export async function ensureAppSchema() {
+  if (schemaVerified) {
+    return;
+  }
+
   if (!schemaInitPromise) {
-    schemaInitPromise = createSchema().catch((error) => {
+    schemaInitPromise = (async () => {
+      const result = await sql`
+        select to_regclass('public.users') as users_table
+      `;
+
+      if (result[0]?.users_table) {
+        schemaVerified = true;
+        return;
+      }
+
+      await createSchema();
+      schemaVerified = true;
+    })().catch((error) => {
       schemaInitPromise = null;
       throw error;
     });
