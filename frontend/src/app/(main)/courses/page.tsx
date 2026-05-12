@@ -17,7 +17,13 @@ import Image from "next/image";
 export default function CoursesPage() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeCourseId, setActiveCourseId] = useState<number | null>(null);
   const { user } = useAuthStore();
+
+  useEffect(() => {
+    const storedCourseId = window.localStorage.getItem("activeCourseId");
+    setActiveCourseId(storedCourseId ? Number(storedCourseId) : null);
+  }, []);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -42,11 +48,13 @@ export default function CoursesPage() {
     );
   }
 
-  // Use active course from store if available, or first course
-  const activeCourse = courses[0] || {
+  const selectedCourse =
+    courses.find((course) => course.id === activeCourseId) ||
+    courses[0] ||
+    {
     id: 1,
     title: "Select a course",
-    image_src: "/es.svg",
+    image_src: "/flags/bw.svg",
   };
 
   return (
@@ -54,8 +62,8 @@ export default function CoursesPage() {
       <StickyWrapper>
         <UserProgress
           activeCourse={{
-            title: activeCourse.title,
-            imageSrc: activeCourse.image_src || "/es.svg",
+            title: selectedCourse.title,
+            imageSrc: selectedCourse.image_src || "/flags/bw.svg",
           }}
           hearts={user.hearts}
           points={user.points}
