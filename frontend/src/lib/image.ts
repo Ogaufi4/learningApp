@@ -7,10 +7,28 @@ export async function resizeImageToAspect(
     return file;
   }
 
+  const passthroughTypes = new Set([
+    "image/svg+xml",
+    "image/gif",
+    "image/x-icon",
+    "image/vnd.microsoft.icon",
+    "image/heic",
+    "image/heif",
+  ]);
+
+  if (passthroughTypes.has(file.type)) {
+    return file;
+  }
+
   const imageUrl = URL.createObjectURL(file);
 
   try {
-    const image = await loadImage(imageUrl);
+    let image: HTMLImageElement;
+    try {
+      image = await loadImage(imageUrl);
+    } catch {
+      return file;
+    }
     const canvas = document.createElement("canvas");
     canvas.width = width;
     canvas.height = height;

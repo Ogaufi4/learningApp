@@ -967,6 +967,105 @@ async function handlePost(request: NextRequest, slug: string[]) {
     return json({ url: uploaded.url, filename: uploaded.filename });
   }
 
+  if (
+    slug[0] === "admin" &&
+    slug[1] === "content" &&
+    slug[2] === "lessons" &&
+    slug[4] === "save"
+  ) {
+    await requireAdmin(request);
+    const lessonId = parseId(slug[3]);
+    if (!lessonId) {
+      return errorResponse("Invalid lesson id", 400);
+    }
+
+    const body = ((await readJson(request)) ?? {}) as {
+      title?: string;
+      unit_id?: number;
+      order_index?: number;
+      challenges?: Array<{
+        type?: string;
+        question?: string;
+        correct_text?: string | null;
+        audio_src?: string | null;
+        order_index?: number;
+        options?: Array<{
+          text?: string;
+          correct?: boolean;
+          image_src?: string | null;
+          audio_src?: string | null;
+        }>;
+      }>;
+    };
+
+    const unitId = parseOptionalNumber(body.unit_id);
+    const orderIndex = parseOptionalNumber(body.order_index);
+    if (!unitId) {
+      return errorResponse("Lesson save requires a valid unit_id", 400);
+    }
+    if (orderIndex === null) {
+      return errorResponse("Lesson save requires a valid order_index", 400);
+    }
+
+    await getSql().begin(async (tx) => {
+      const existingLessonRows = await tx`
+        select id
+        from lessons
+        where id = ${lessonId}
+        limit 1
+      `;
+      if (!existingLessonRows[0]) {
+        throw new Error("Lesson not found");
+      }
+
+      await tx`
+        update lessons
+        set
+          title = ${String(body.title ?? "")},
+          unit_id = ${unitId},
+          order_index = ${orderIndex}
+        where id = ${lessonId}
+      `;
+
+      await tx`
+        delete from challenges
+        where lesson_id = ${lessonId}
+      `;
+
+      for (const [challengeIndex, challenge] of (body.challenges ?? []).entries()) {
+        const insertedChallenges = await tx`
+          insert into challenges (lesson_id, type, question, correct_text, audio_src, order_index)
+          values (
+            ${lessonId},
+            ${String(challenge.type ?? "SELECT")},
+            ${String(challenge.question ?? "")},
+            ${challenge.correct_text ? String(challenge.correct_text) : null},
+            ${challenge.audio_src ? String(challenge.audio_src) : null},
+            ${parseOptionalNumber(challenge.order_index) ?? challengeIndex + 1}
+          )
+          returning id
+        `;
+        const insertedChallengeId = Number(insertedChallenges[0].id);
+
+        for (const option of challenge.options ?? []) {
+          await tx`
+            insert into challenge_options (challenge_id, text, correct, image_src, audio_src)
+            values (
+              ${insertedChallengeId},
+              ${String(option.text ?? "")},
+              ${Boolean(option.correct ?? false)},
+              ${option.image_src ? String(option.image_src) : null},
+              ${option.audio_src ? String(option.audio_src) : null}
+            )
+          `;
+        }
+      }
+    });
+
+    const lesson = await getLesson(lessonId);
+    return lesson ? json(lesson) : errorResponse("Lesson not found", 404);
+  }
+
   if (slug[0] === "admin" && slug[1] === "content" && slug[2] === "courses" && slug.length === 3) {
     await requireAdmin(request);
     const body = ((await readJson(request)) ?? {}) as Record<string, unknown>;

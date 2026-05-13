@@ -1,5 +1,5 @@
 import apiClient from '../api';
-import type { Course, Unit, Lesson, Challenge, ChallengeOption } from '@/types/api';
+import type { Course, Unit, Lesson, Challenge, ChallengeOption, LessonSavePayload } from '@/types/api';
 
 export const courseApi = {
   // Get all courses
@@ -79,6 +79,11 @@ export const lessonApi = {
   // Update a lesson
   updateLesson: async (lessonId: number, data: Partial<Lesson>): Promise<Lesson> => {
     const response = await apiClient.put<Lesson>(`/admin/content/lessons/${lessonId}`, data);
+    return response.data;
+  },
+
+  saveLessonTree: async (lessonId: number, data: LessonSavePayload): Promise<Lesson> => {
+    const response = await apiClient.post<Lesson>(`/admin/content/lessons/${lessonId}/save`, data);
     return response.data;
   },
 

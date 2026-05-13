@@ -90,70 +90,27 @@ export default function LessonEditorPage() {
       if (!lesson) return;
       setSaving(true);
       try {
-          // 1. Update Lesson Details
-          await lessonApi.updateLesson(lessonId, {
+          await lessonApi.saveLessonTree(lessonId, {
               title: lesson.title,
               unit_id: lesson.unit_id,
               order_index: lesson.order_index,
+              challenges: challenges.map((challenge, challengeIndex) => ({
+                  id: challenge.id > 0 ? challenge.id : undefined,
+                  lesson_id: lessonId,
+                  question: challenge.question,
+                  type: challenge.type,
+                  correct_text: challenge.correct_text,
+                  audio_src: challenge.audio_src,
+                  order_index: challenge.order_index ?? challengeIndex + 1,
+                  options: (challenge.options || []).map((option) => ({
+                      id: option.id > 0 ? option.id : undefined,
+                      text: option.text,
+                      correct: option.correct,
+                      image_src: option.image_src,
+                      audio_src: option.audio_src,
+                  })),
+              })),
           });
-
-          // 2. Update/Create Challenges & Options
-          // This is a simplified approach. Ideally we blindly update all or track dirty state.
-          // For now, let's just iterate and update everything to ensure consistency.
-          
-          for (const challenge of challenges) {
-              if (challenge.id < 0) {
-                   // New challenge (dummy ID) - Create it
-                   const newChallenge = await lessonApi.createChallenge({
-                       lesson_id: lessonId,
-                       question: challenge.question,
-                       type: challenge.type,
-                       correct_text: challenge.correct_text,
-                       audio_src: challenge.audio_src,
-                       order_index: challenge.order_index
-                   });
-                   // Options for new challenge?
-                   for (const option of challenge.options || []) {
-                       await lessonApi.createOption(newChallenge.id, {
-                           text: option.text,
-                           correct: option.correct,
-                           image_src: option.image_src,
-                           audio_src: option.audio_src
-                       });
-                   }
-              } else {
-                  // Existing challenge - Update it
-                  await lessonApi.updateChallenge(challenge.id, {
-                      lesson_id: challenge.lesson_id,
-                      question: challenge.question,
-                      type: challenge.type,
-                      correct_text: challenge.correct_text,
-                      audio_src: challenge.audio_src,
-                      order_index: challenge.order_index,
-                  });
-
-                  // Handle Options
-                  for (const option of challenge.options || []) {
-                      if (option.id < 0) {
-                           // New option
-                           await lessonApi.createOption(challenge.id, {
-                               text: option.text,
-                               correct: option.correct,
-                               image_src: option.image_src,
-                               audio_src: option.audio_src
-                           });
-                      } else {
-                          // Existing option
-                          await lessonApi.updateOption(option.id, {
-                               text: option.text,
-                               correct: option.correct,
-                               image_src: option.image_src,
-                               audio_src: option.audio_src
-                          });
-                      }
-                  }
-              }
-          }
           
           toast.success("Lesson saved successfully");
           fetchLessonData(); // Refresh to clean up temp IDs/states

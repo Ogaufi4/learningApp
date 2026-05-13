@@ -18,6 +18,7 @@ export default function CoursesPage() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCourseId, setActiveCourseId] = useState<number | null>(null);
+  const [brokenImages, setBrokenImages] = useState<Record<number, boolean>>({});
   const { user } = useAuthStore();
 
   useEffect(() => {
@@ -101,9 +102,19 @@ export default function CoursesPage() {
                 >
                   <div className="border-2 rounded-xl border-b-4 hover:bg-black/5 cursor-pointer active:border-b-2 flex flex-col items-center gap-3 p-6 pb-8 min-h-[217px] min-w-[200px] transition">
                     <div className="relative aspect-[4/3] w-[120px] rounded-lg overflow-hidden drop-shadow-md">
-                      {course.image_src && (
+                      {(course.image_src && !brokenImages[course.id]) ? (
                         <Image
                           src={formatAssetUrl(course.image_src) || ""}
+                          alt={course.title}
+                          fill
+                          className="object-cover"
+                          onError={() =>
+                            setBrokenImages((current) => ({ ...current, [course.id]: true }))
+                          }
+                        />
+                      ) : (
+                        <Image
+                          src="/flags/bw.svg"
                           alt={course.title}
                           fill
                           className="object-cover"
