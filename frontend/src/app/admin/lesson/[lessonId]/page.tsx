@@ -25,14 +25,14 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { lessonApi, courseApi } from "@/lib/api/courses";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Challenge, ChallengeOption } from "@/types/api";
+import { Challenge, ChallengeOption, Lesson } from "@/types/api";
 
 export default function LessonEditorPage() {
   const params = useParams();
   const lessonId = parseInt(params.lessonId as string);
   const router = useRouter();
 
-  const [lesson, setLesson] = useState<{ title: string } | null>(null);
+  const [lesson, setLesson] = useState<Lesson | null>(null);
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -83,7 +83,7 @@ export default function LessonEditorPage() {
   };
 
   const handleUpdateLessonTitle = async (title: string) => {
-      setLesson({ ...lesson, title });
+      setLesson((current) => (current ? { ...current, title } : current));
   };
 
   const handleSave = async () => {
@@ -91,7 +91,11 @@ export default function LessonEditorPage() {
       setSaving(true);
       try {
           // 1. Update Lesson Details
-          await lessonApi.updateLesson(lessonId, { title: lesson.title });
+          await lessonApi.updateLesson(lessonId, {
+              title: lesson.title,
+              unit_id: lesson.unit_id,
+              order_index: lesson.order_index,
+          });
 
           // 2. Update/Create Challenges & Options
           // This is a simplified approach. Ideally we blindly update all or track dirty state.
@@ -120,10 +124,12 @@ export default function LessonEditorPage() {
               } else {
                   // Existing challenge - Update it
                   await lessonApi.updateChallenge(challenge.id, {
+                      lesson_id: challenge.lesson_id,
                       question: challenge.question,
                       type: challenge.type,
                       correct_text: challenge.correct_text,
                       audio_src: challenge.audio_src,
+                      order_index: challenge.order_index,
                   });
 
                   // Handle Options

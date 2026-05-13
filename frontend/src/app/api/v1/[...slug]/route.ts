@@ -56,6 +56,10 @@ function parseId(value: string | undefined) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function hasOwn(body: Record<string, unknown>, key: string) {
+  return Object.prototype.hasOwnProperty.call(body, key);
+}
+
 function serializeUser(user: DbUser) {
   return {
     id: user.id,
@@ -1091,12 +1095,22 @@ async function handlePut(request: NextRequest, slug: string[]) {
       return errorResponse("Invalid lesson id", 400);
     }
     const body = (await readJson(request)) as Record<string, unknown>;
+    const existingRows = await sql`
+      select *
+      from lessons
+      where id = ${lessonId}
+      limit 1
+    `;
+    const existing = existingRows[0] as Record<string, unknown> | undefined;
+    if (!existing) {
+      return errorResponse("Lesson not found", 404);
+    }
     const rows = await sql`
       update lessons
       set
-        title = ${String(body.title ?? "")},
-        unit_id = ${Number(body.unit_id)},
-        order_index = ${Number(body.order_index ?? 0)}
+        title = ${hasOwn(body, "title") ? String(body.title ?? "") : String(existing.title ?? "")},
+        unit_id = ${hasOwn(body, "unit_id") ? Number(body.unit_id) : Number(existing.unit_id)},
+        order_index = ${hasOwn(body, "order_index") ? Number(body.order_index ?? 0) : Number(existing.order_index ?? 0)}
       where id = ${lessonId}
       returning *
     `;
@@ -1110,15 +1124,29 @@ async function handlePut(request: NextRequest, slug: string[]) {
       return errorResponse("Invalid challenge id", 400);
     }
     const body = (await readJson(request)) as Record<string, unknown>;
+    const existingRows = await sql`
+      select *
+      from challenges
+      where id = ${challengeId}
+      limit 1
+    `;
+    const existing = existingRows[0] as Record<string, unknown> | undefined;
+    if (!existing) {
+      return errorResponse("Challenge not found", 404);
+    }
     const rows = await sql`
       update challenges
       set
-        lesson_id = ${Number(body.lesson_id)},
-        type = ${String(body.type ?? "SELECT")},
-        question = ${String(body.question ?? "")},
-        correct_text = ${body.correct_text ? String(body.correct_text) : null},
-        audio_src = ${body.audio_src ? String(body.audio_src) : null},
-        order_index = ${Number(body.order_index ?? 0)}
+        lesson_id = ${hasOwn(body, "lesson_id") ? Number(body.lesson_id) : Number(existing.lesson_id)},
+        type = ${hasOwn(body, "type") ? String(body.type ?? "SELECT") : String(existing.type ?? "SELECT")},
+        question = ${hasOwn(body, "question") ? String(body.question ?? "") : String(existing.question ?? "")},
+        correct_text = ${hasOwn(body, "correct_text")
+          ? (body.correct_text ? String(body.correct_text) : null)
+          : (existing.correct_text ? String(existing.correct_text) : null)},
+        audio_src = ${hasOwn(body, "audio_src")
+          ? (body.audio_src ? String(body.audio_src) : null)
+          : (existing.audio_src ? String(existing.audio_src) : null)},
+        order_index = ${hasOwn(body, "order_index") ? Number(body.order_index ?? 0) : Number(existing.order_index ?? 0)}
       where id = ${challengeId}
       returning *
     `;
