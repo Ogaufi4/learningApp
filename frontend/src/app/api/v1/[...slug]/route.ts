@@ -63,6 +63,11 @@ function hasOwn(body: unknown, key: string) {
   return Object.prototype.hasOwnProperty.call(body, key);
 }
 
+function parseOptionalNumber(value: unknown) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 function getFileExtension(file: File) {
   return file.name.split(".").pop()?.toLowerCase() || "";
 }
@@ -1138,7 +1143,7 @@ async function handlePut(request: NextRequest, slug: string[]) {
     if (!lessonId) {
       return errorResponse("Invalid lesson id", 400);
     }
-    const body = (await readJson(request)) as Record<string, unknown>;
+    const body = ((await readJson(request)) ?? {}) as Record<string, unknown>;
     const existingRows = await sql`
       select *
       from lessons
@@ -1149,12 +1154,28 @@ async function handlePut(request: NextRequest, slug: string[]) {
     if (!existing) {
       return errorResponse("Lesson not found", 404);
     }
+    const nextTitle = hasOwn(body, "title") ? String(body.title ?? "") : String(existing.title ?? "");
+    const nextUnitId = hasOwn(body, "unit_id")
+      ? parseOptionalNumber(body.unit_id)
+      : parseOptionalNumber(existing.unit_id);
+    const nextOrderIndex = hasOwn(body, "order_index")
+      ? parseOptionalNumber(body.order_index)
+      : parseOptionalNumber(existing.order_index);
+
+    if (!nextUnitId) {
+      return errorResponse("Lesson update requires a valid unit_id", 400);
+    }
+
+    if (nextOrderIndex === null) {
+      return errorResponse("Lesson update requires a valid order_index", 400);
+    }
+
     const rows = await sql`
       update lessons
       set
-        title = ${hasOwn(body, "title") ? String(body.title ?? "") : String(existing.title ?? "")},
-        unit_id = ${hasOwn(body, "unit_id") ? Number(body.unit_id) : Number(existing.unit_id)},
-        order_index = ${hasOwn(body, "order_index") ? Number(body.order_index ?? 0) : Number(existing.order_index ?? 0)}
+        title = ${nextTitle},
+        unit_id = ${nextUnitId},
+        order_index = ${nextOrderIndex}
       where id = ${lessonId}
       returning *
     `;
@@ -1167,7 +1188,7 @@ async function handlePut(request: NextRequest, slug: string[]) {
     if (!challengeId) {
       return errorResponse("Invalid challenge id", 400);
     }
-    const body = (await readJson(request)) as Record<string, unknown>;
+    const body = ((await readJson(request)) ?? {}) as Record<string, unknown>;
     const existingRows = await sql`
       select *
       from challenges
@@ -1178,10 +1199,25 @@ async function handlePut(request: NextRequest, slug: string[]) {
     if (!existing) {
       return errorResponse("Challenge not found", 404);
     }
+    const nextLessonId = hasOwn(body, "lesson_id")
+      ? parseOptionalNumber(body.lesson_id)
+      : parseOptionalNumber(existing.lesson_id);
+    const nextOrderIndex = hasOwn(body, "order_index")
+      ? parseOptionalNumber(body.order_index)
+      : parseOptionalNumber(existing.order_index);
+
+    if (!nextLessonId) {
+      return errorResponse("Challenge update requires a valid lesson_id", 400);
+    }
+
+    if (nextOrderIndex === null) {
+      return errorResponse("Challenge update requires a valid order_index", 400);
+    }
+
     const rows = await sql`
       update challenges
       set
-        lesson_id = ${hasOwn(body, "lesson_id") ? Number(body.lesson_id) : Number(existing.lesson_id)},
+        lesson_id = ${nextLessonId},
         type = ${hasOwn(body, "type") ? String(body.type ?? "SELECT") : String(existing.type ?? "SELECT")},
         question = ${hasOwn(body, "question") ? String(body.question ?? "") : String(existing.question ?? "")},
         correct_text = ${hasOwn(body, "correct_text")
@@ -1190,7 +1226,7 @@ async function handlePut(request: NextRequest, slug: string[]) {
         audio_src = ${hasOwn(body, "audio_src")
           ? (body.audio_src ? String(body.audio_src) : null)
           : (existing.audio_src ? String(existing.audio_src) : null)},
-        order_index = ${hasOwn(body, "order_index") ? Number(body.order_index ?? 0) : Number(existing.order_index ?? 0)}
+        order_index = ${nextOrderIndex}
       where id = ${challengeId}
       returning *
     `;
