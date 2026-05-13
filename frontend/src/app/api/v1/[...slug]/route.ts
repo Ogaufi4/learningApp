@@ -56,8 +56,55 @@ function parseId(value: string | undefined) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-function hasOwn(body: Record<string, unknown>, key: string) {
+function hasOwn(body: unknown, key: string) {
+  if (!body || typeof body !== "object") {
+    return false;
+  }
   return Object.prototype.hasOwnProperty.call(body, key);
+}
+
+function getFileExtension(file: File) {
+  return file.name.split(".").pop()?.toLowerCase() || "";
+}
+
+function isImageFile(file: File) {
+  const extension = getFileExtension(file);
+  const allowedImageExtensions = new Set([
+    "png",
+    "jpg",
+    "jpeg",
+    "svg",
+    "webp",
+    "gif",
+    "avif",
+    "bmp",
+    "ico",
+    "jfif",
+    "pjpeg",
+    "pjp",
+    "tif",
+    "tiff",
+    "heic",
+    "heif",
+  ]);
+
+  return file.type.startsWith("image/") || allowedImageExtensions.has(extension);
+}
+
+function isAudioFile(file: File) {
+  const extension = getFileExtension(file);
+  const allowedAudioExtensions = new Set([
+    "mp3",
+    "wav",
+    "ogg",
+    "m4a",
+    "aac",
+    "flac",
+    "webm",
+    "mp4",
+  ]);
+
+  return file.type.startsWith("audio/") || allowedAudioExtensions.has(extension);
 }
 
 function serializeUser(user: DbUser) {
@@ -815,9 +862,8 @@ async function handlePost(request: NextRequest, slug: string[]) {
   if (slug[0] === "users" && slug[1] === "upload") {
     const user = await getRequiredUser(request);
     const file = await readMultipartFile(request);
-    const extension = file.name.split(".").pop()?.toLowerCase() || "";
 
-    if (!["png", "jpg", "jpeg", "svg", "webp"].includes(extension)) {
+    if (!isImageFile(file)) {
       return errorResponse("Invalid image type", 400);
     }
 
@@ -907,11 +953,9 @@ async function handlePost(request: NextRequest, slug: string[]) {
   if (slug[0] === "admin" && slug[1] === "content" && slug[2] === "upload") {
     await requireAdmin(request);
     const file = await readMultipartFile(request);
-    const extension = file.name.split(".").pop()?.toLowerCase() || "";
-    const allowedExtensions = ["png", "jpg", "jpeg", "svg", "webp", "mp3", "wav", "ogg", "m4a"];
 
-    if (!allowedExtensions.includes(extension)) {
-      return errorResponse("Invalid file type", 400);
+    if (!isImageFile(file) && !isAudioFile(file)) {
+      return errorResponse("Invalid file type. Upload an image or audio file.", 400);
     }
 
     const uploaded = await uploadPublicFile(file, "admin");
@@ -920,7 +964,7 @@ async function handlePost(request: NextRequest, slug: string[]) {
 
   if (slug[0] === "admin" && slug[1] === "content" && slug[2] === "courses" && slug.length === 3) {
     await requireAdmin(request);
-    const body = (await readJson(request)) as Record<string, unknown>;
+    const body = ((await readJson(request)) ?? {}) as Record<string, unknown>;
     const rows = await sql`
       insert into courses (title, description, image_src, order_index)
       values (
@@ -936,7 +980,7 @@ async function handlePost(request: NextRequest, slug: string[]) {
 
   if (slug[0] === "admin" && slug[1] === "content" && slug[2] === "units" && slug.length === 3) {
     await requireAdmin(request);
-    const body = (await readJson(request)) as Record<string, unknown>;
+    const body = ((await readJson(request)) ?? {}) as Record<string, unknown>;
     const rows = await sql`
       insert into units (title, description, course_id, order_index)
       values (

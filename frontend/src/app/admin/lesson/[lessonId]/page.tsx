@@ -159,7 +159,10 @@ export default function LessonEditorPage() {
           fetchLessonData(); // Refresh to clean up temp IDs/states
       } catch (error) {
           console.error("Failed to save", error);
-          toast.error("Failed to save changes");
+          const message =
+            (error as { response?: { data?: { detail?: string } } }).response?.data?.detail ||
+            (error instanceof Error ? error.message : "Failed to save changes");
+          toast.error(message);
       } finally {
           setSaving(false);
       }
