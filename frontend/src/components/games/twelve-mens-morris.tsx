@@ -34,7 +34,7 @@ type RoomSnapshot = {
   hostName: string;
   guestName: string;
   state: MorrisState;
-  updatedAt: number;
+  updatedAt: string;
 };
 
 type RoomSession = {
@@ -43,7 +43,6 @@ type RoomSession = {
   playerName: string;
 };
 
-const ROOM_STORAGE_PREFIX = "morris-room-";
 const ROOM_SESSION_STORAGE_KEY = "morris-room-session";
 
 function playTone(enabled: boolean, frequency: number, duration = 0.12) {
@@ -72,41 +71,6 @@ function playTone(enabled: boolean, frequency: number, duration = 0.12) {
 function generateRoomCode() {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   return Array.from({ length: 6 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
-}
-
-function getRoomStorageKey(roomCode: string) {
-  return `${ROOM_STORAGE_PREFIX}${roomCode.toUpperCase()}`;
-}
-
-function readRoom(roomCode: string) {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  const raw = window.localStorage.getItem(getRoomStorageKey(roomCode));
-  if (!raw) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(raw) as RoomSnapshot;
-  } catch {
-    return null;
-  }
-}
-
-function writeRoom(room: RoomSnapshot) {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  const nextRoom = {
-    ...room,
-    roomCode: room.roomCode.toUpperCase(),
-    updatedAt: Date.now(),
-  };
-
-  window.localStorage.setItem(getRoomStorageKey(nextRoom.roomCode), JSON.stringify(nextRoom));
 }
 
 function readRoomSession() {
@@ -170,29 +134,42 @@ export function TwelveMensMorrisGame() {
       ? `${window.location.origin}${window.location.pathname}?room=${roomSession.roomCode}`
       : "";
 
+  const fetchRoom = async (roomCode: string) => {
+    const response = await fetch(`/api/morris/rooms/${roomCode.toUpperCase()}`, {
+      cache: "no-store",
+    });
+
+    const payload = await response.json();
+    if (!response.ok) {
+      throw new Error(payload.error ?? "Room request failed.");
+    }
+
+    return payload.room as RoomSnapshot;
+  };
+
   useEffect(() => {
     const existingSession = readRoomSession();
     if (!existingSession) {
       return;
     }
 
-    const room = readRoom(existingSession.roomCode);
-    if (!room) {
-      writeRoomSession(null);
-      return;
-    }
-
-    setPlayMode("multiplayer");
-    setRoomSession(existingSession);
-    setRoomSnapshot(room);
-    setState(room.state);
-    setPlayerNameInput(existingSession.playerName);
-    setRoomCodeInput(existingSession.roomCode);
-    setStatusMessage(
-      room.guestName
-        ? `${room.hostName} and ${room.guestName} are connected in room ${room.roomCode}.`
-        : `Room ${room.roomCode} is waiting for a second player.`,
-    );
+    fetchRoom(existingSession.roomCode)
+      .then((room) => {
+        setPlayMode("multiplayer");
+        setRoomSession(existingSession);
+        setRoomSnapshot(room);
+        setState(room.state);
+        setPlayerNameInput(existingSession.playerName);
+        setRoomCodeInput(existingSession.roomCode);
+        setStatusMessage(
+          room.guestName
+            ? `${room.hostName} and ${room.guestName} are connected in room ${room.roomCode}.`
+            : `Room ${room.roomCode} is waiting for a second player.`,
+        );
+      })
+      .catch(() => {
+        writeRoomSession(null);
+      });
   }, []);
 
   useEffect(() => {
@@ -212,54 +189,26 @@ export function TwelveMensMorrisGame() {
   }, []);
 
   useEffect(() => {
-    if (typeof window === "undefined") {
+    if (!roomSession) {
       return;
     }
 
-    const syncRoom = (nextRoom: RoomSnapshot | null) => {
-      if (!roomSession || !nextRoom || nextRoom.roomCode !== roomSession.roomCode) {
-        return;
-      }
+    const interval = window.setInterval(() => {
+      fetchRoom(roomSession.roomCode)
+        .then((room) => {
+          setRoomSnapshot(room);
+          setState(room.state);
+          setStatusMessage(
+            room.guestName
+              ? `${room.hostName} and ${room.guestName} are connected in room ${room.roomCode}.`
+              : `Room ${room.roomCode} is waiting for a second player.`,
+          );
+        })
+        .catch(() => {});
+    }, 1500);
 
-      setRoomSnapshot(nextRoom);
-      setState(nextRoom.state);
-      setStatusMessage(
-        nextRoom.guestName
-          ? `${nextRoom.hostName} and ${nextRoom.guestName} are connected in room ${nextRoom.roomCode}.`
-          : `Room ${nextRoom.roomCode} is waiting for a second player.`,
-      );
-    };
-
-    const handleStorage = (event: StorageEvent) => {
-      if (!roomSession || event.key !== getRoomStorageKey(roomSession.roomCode) || !event.newValue) {
-        return;
-      }
-
-      try {
-        syncRoom(JSON.parse(event.newValue) as RoomSnapshot);
-      } catch {
-        return;
-      }
-    };
-
-    window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
+    return () => window.clearInterval(interval);
   }, [roomSession]);
-
-  const syncLocalRoomState = (nextState: MorrisState) => {
-    if (!roomSession || !roomSnapshot) {
-      return;
-    }
-
-    const nextRoom: RoomSnapshot = {
-      ...roomSnapshot,
-      state: nextState,
-      updatedAt: Date.now(),
-    };
-
-    writeRoom(nextRoom);
-    setRoomSnapshot(nextRoom);
-  };
 
   const resetLocalMatch = () => {
     const nextState = createInitialState();
@@ -278,33 +227,34 @@ export function TwelveMensMorrisGame() {
       return;
     }
 
-    let roomCode = generateRoomCode();
-    while (readRoom(roomCode)) {
-      roomCode = generateRoomCode();
-    }
+    fetch("/api/morris/rooms", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ playerName }),
+    })
+      .then(async (response) => {
+        const payload = await response.json();
+        if (!response.ok) {
+          throw new Error(payload.error ?? "Could not create room.");
+        }
 
-    const room: RoomSnapshot = {
-      roomCode,
-      hostName: playerName,
-      guestName: "",
-      state: createInitialState(),
-      updatedAt: Date.now(),
-    };
+        const session: RoomSession = {
+          roomCode: payload.roomCode,
+          playerNumber: payload.playerNumber,
+          playerName,
+        };
 
-    const session: RoomSession = {
-      roomCode,
-      playerNumber: 1,
-      playerName,
-    };
-
-    writeRoom(room);
-    writeRoomSession(session);
-    setPlayMode("multiplayer");
-    setRoomCodeInput(roomCode);
-    setRoomSession(session);
-    setRoomSnapshot(room);
-    setState(room.state);
-    setStatusMessage(`Room ${roomCode} created. Copy the invite link and open it in another tab or send the code to your friend.`);
+        writeRoomSession(session);
+        setPlayMode("multiplayer");
+        setRoomCodeInput(payload.roomCode);
+        setRoomSession(session);
+        setRoomSnapshot(payload.room as RoomSnapshot);
+        setState((payload.room as RoomSnapshot).state);
+        setStatusMessage(`Room ${payload.roomCode} created. Copy the invite link and send it to your friend.`);
+      })
+      .catch((error: Error) => {
+        setStatusMessage(error.message);
+      });
   };
 
   const joinRoom = () => {
@@ -321,43 +271,33 @@ export function TwelveMensMorrisGame() {
       return;
     }
 
-    const room = readRoom(roomCode);
-    if (!room) {
-      setStatusMessage(`Room ${roomCode} was not found. Create it first in another tab.`);
-      return;
-    }
+    fetch(`/api/morris/rooms/${roomCode}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "join", playerName }),
+    })
+      .then(async (response) => {
+        const payload = await response.json();
+        if (!response.ok) {
+          throw new Error(payload.error ?? "Could not join room.");
+        }
 
-    let playerNumber: 1 | 2 = 2;
-    let nextRoom = room;
+        const session: RoomSession = {
+          roomCode,
+          playerNumber: payload.playerNumber,
+          playerName,
+        };
 
-    if (!room.guestName) {
-      nextRoom = {
-        ...room,
-        guestName: playerName,
-        updatedAt: Date.now(),
-      };
-      writeRoom(nextRoom);
-    } else if (room.guestName === playerName) {
-      playerNumber = 2;
-    } else if (room.hostName === playerName) {
-      playerNumber = 1;
-    } else {
-      setStatusMessage(`Room ${roomCode} already has two players connected.`);
-      return;
-    }
-
-    const session: RoomSession = {
-      roomCode,
-      playerNumber,
-      playerName,
-    };
-
-    writeRoomSession(session);
-    setPlayMode("multiplayer");
-    setRoomSession(session);
-    setRoomSnapshot(nextRoom);
-    setState(nextRoom.state);
-    setStatusMessage(`Joined room ${roomCode} as Player ${playerNumber}.`);
+        writeRoomSession(session);
+        setPlayMode("multiplayer");
+        setRoomSession(session);
+        setRoomSnapshot(payload.room as RoomSnapshot);
+        setState((payload.room as RoomSnapshot).state);
+        setStatusMessage(`Joined room ${roomCode} as Player ${payload.playerNumber}.`);
+      })
+      .catch((error: Error) => {
+        setStatusMessage(error.message);
+      });
   };
 
   const copyInviteLink = async () => {
@@ -384,22 +324,29 @@ export function TwelveMensMorrisGame() {
   };
 
   const restartRoom = () => {
-    if (!roomSession || !roomSnapshot) {
+    if (!roomSession) {
       resetLocalMatch();
       return;
     }
 
-    const nextState = createInitialState();
-    const nextRoom: RoomSnapshot = {
-      ...roomSnapshot,
-      state: nextState,
-      updatedAt: Date.now(),
-    };
+    fetch(`/api/morris/rooms/${roomSession.roomCode}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "restart" }),
+    })
+      .then(async (response) => {
+        const payload = await response.json();
+        if (!response.ok) {
+          throw new Error(payload.error ?? "Could not restart room.");
+        }
 
-    writeRoom(nextRoom);
-    setRoomSnapshot(nextRoom);
-    setState(nextState);
-    setStatusMessage(`Room ${roomSession.roomCode} restarted.`);
+        setRoomSnapshot(payload.room as RoomSnapshot);
+        setState((payload.room as RoomSnapshot).state);
+        setStatusMessage(`Room ${roomSession.roomCode} restarted.`);
+      })
+      .catch((error: Error) => {
+        setStatusMessage(error.message);
+      });
   };
 
   const onPointClick = (point: number) => {
@@ -421,9 +368,35 @@ export function TwelveMensMorrisGame() {
     playTone(soundOn, result.nextState.removingPiece ? 660 : 440);
     setState(result.nextState);
 
-    if (isInRoom) {
-      syncLocalRoomState(result.nextState);
-      setStatusMessage(`Room ${roomSession?.roomCode} updated.`);
+    if (isInRoom && roomSession) {
+      fetch(`/api/morris/rooms/${roomSession.roomCode}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "move",
+          playerNumber: roomSession.playerNumber,
+          point,
+        }),
+      })
+        .then(async (response) => {
+          const payload = await response.json();
+          if (!response.ok) {
+            throw new Error(payload.error ?? "Move failed.");
+          }
+
+          setRoomSnapshot(payload.room as RoomSnapshot);
+          setState((payload.room as RoomSnapshot).state);
+          setStatusMessage(`Room ${roomSession.roomCode} updated.`);
+        })
+        .catch((error: Error) => {
+          setStatusMessage(error.message);
+          fetchRoom(roomSession.roomCode)
+            .then((room) => {
+              setRoomSnapshot(room);
+              setState(room.state);
+            })
+            .catch(() => {});
+        });
       return;
     }
 
