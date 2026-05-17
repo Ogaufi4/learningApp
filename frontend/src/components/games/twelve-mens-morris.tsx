@@ -24,6 +24,7 @@ import {
   createInitialState,
   getLegalMoves,
   getRemovablePoints,
+  normalizeMorrisState,
   type MorrisState,
 } from "@/lib/games/twelve-mens-morris";
 
@@ -36,6 +37,26 @@ type RoomSnapshot = {
   state: MorrisState;
   updatedAt: string;
 };
+
+function normalizeRoomSnapshot(value: unknown): RoomSnapshot | null {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  const candidate = value as Partial<RoomSnapshot>;
+  if (typeof candidate.roomCode !== "string" || typeof candidate.hostName !== "string") {
+    return null;
+  }
+
+  return {
+    roomCode: candidate.roomCode.toUpperCase(),
+    hostName: candidate.hostName,
+    guestName: typeof candidate.guestName === "string" ? candidate.guestName : "",
+    state: normalizeMorrisState(candidate.state),
+    updatedAt:
+      typeof candidate.updatedAt === "string" ? candidate.updatedAt : new Date().toISOString(),
+  };
+}
 
 type RoomSession = {
   roomCode: string;
@@ -144,7 +165,12 @@ export function TwelveMensMorrisGame() {
       throw new Error(payload.error ?? "Room request failed.");
     }
 
-    return payload.room as RoomSnapshot;
+    const room = normalizeRoomSnapshot(payload.room);
+    if (!room) {
+      throw new Error("Room payload was invalid.");
+    }
+
+    return room;
   };
 
   useEffect(() => {
@@ -248,8 +274,13 @@ export function TwelveMensMorrisGame() {
         setPlayMode("multiplayer");
         setRoomCodeInput(payload.roomCode);
         setRoomSession(session);
-        setRoomSnapshot(payload.room as RoomSnapshot);
-        setState((payload.room as RoomSnapshot).state);
+        const room = normalizeRoomSnapshot(payload.room);
+        if (!room) {
+          throw new Error("Room payload was invalid.");
+        }
+
+        setRoomSnapshot(room);
+        setState(room.state);
         setStatusMessage(`Room ${payload.roomCode} created. Copy the invite link and send it to your friend.`);
       })
       .catch((error: Error) => {
@@ -291,8 +322,13 @@ export function TwelveMensMorrisGame() {
         writeRoomSession(session);
         setPlayMode("multiplayer");
         setRoomSession(session);
-        setRoomSnapshot(payload.room as RoomSnapshot);
-        setState((payload.room as RoomSnapshot).state);
+        const room = normalizeRoomSnapshot(payload.room);
+        if (!room) {
+          throw new Error("Room payload was invalid.");
+        }
+
+        setRoomSnapshot(room);
+        setState(room.state);
         setStatusMessage(`Joined room ${roomCode} as Player ${payload.playerNumber}.`);
       })
       .catch((error: Error) => {
@@ -340,8 +376,13 @@ export function TwelveMensMorrisGame() {
           throw new Error(payload.error ?? "Could not restart room.");
         }
 
-        setRoomSnapshot(payload.room as RoomSnapshot);
-        setState((payload.room as RoomSnapshot).state);
+        const room = normalizeRoomSnapshot(payload.room);
+        if (!room) {
+          throw new Error("Room payload was invalid.");
+        }
+
+        setRoomSnapshot(room);
+        setState(room.state);
         setStatusMessage(`Room ${roomSession.roomCode} restarted.`);
       })
       .catch((error: Error) => {
@@ -384,8 +425,13 @@ export function TwelveMensMorrisGame() {
             throw new Error(payload.error ?? "Move failed.");
           }
 
-          setRoomSnapshot(payload.room as RoomSnapshot);
-          setState((payload.room as RoomSnapshot).state);
+          const room = normalizeRoomSnapshot(payload.room);
+          if (!room) {
+            throw new Error("Room payload was invalid.");
+          }
+
+          setRoomSnapshot(room);
+          setState(room.state);
           setStatusMessage(`Room ${roomSession.roomCode} updated.`);
         })
         .catch((error: Error) => {

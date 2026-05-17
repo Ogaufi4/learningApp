@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   applyHumanAction,
   createInitialState,
+  normalizeMorrisState,
   type MorrisState,
 } from "@/lib/games/twelve-mens-morris";
 import { sql } from "@/lib/server/db";
@@ -41,11 +42,16 @@ async function getRoom(roomCode: string) {
 }
 
 function serializeRoom(room: NonNullable<Awaited<ReturnType<typeof getRoom>>>) {
+  const state =
+    typeof room.game_state === "string"
+      ? normalizeMorrisState(JSON.parse(room.game_state))
+      : normalizeMorrisState(room.game_state);
+
   return {
     roomCode: room.room_code,
     hostName: room.host_name,
     guestName: room.guest_name ?? "",
-    state: room.game_state,
+    state,
     updatedAt: room.updated_at,
   };
 }
@@ -134,7 +140,10 @@ export async function PATCH(
       return NextResponse.json({ error: "Valid player number is required." }, { status: 400 });
     }
 
-    const currentState = room.game_state;
+    const currentState =
+      typeof room.game_state === "string"
+        ? normalizeMorrisState(JSON.parse(room.game_state))
+        : normalizeMorrisState(room.game_state);
     if (!room.guest_name) {
       return NextResponse.json({ error: "Waiting for another player to join." }, { status: 409 });
     }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createInitialState } from "@/lib/games/twelve-mens-morris";
+import { createInitialState, normalizeMorrisState } from "@/lib/games/twelve-mens-morris";
 import { sql } from "@/lib/server/db";
 
 const ROOM_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -65,7 +65,8 @@ export async function POST(request: NextRequest) {
       roomCode,
       hostName: playerName,
       guestName: "",
-      state,
+      state: normalizeMorrisState(state),
+      updatedAt: new Date().toISOString(),
     },
   });
 }

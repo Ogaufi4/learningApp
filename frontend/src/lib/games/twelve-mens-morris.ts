@@ -83,6 +83,53 @@ export function createInitialState(): MorrisState {
   };
 }
 
+export function normalizeMorrisState(value: unknown): MorrisState {
+  const fallback = createInitialState();
+
+  if (!value || typeof value !== "object") {
+    return fallback;
+  }
+
+  const candidate = value as Partial<MorrisState>;
+  const board =
+    Array.isArray(candidate.board) && candidate.board.length === 24
+      ? candidate.board.map((cell) => (typeof cell === "number" ? cell : 0))
+      : fallback.board;
+
+  const currentPlayer = candidate.currentPlayer === 2 ? 2 : 1;
+  const phase = candidate.phase === "movement" ? "movement" : "placement";
+  const unplacedPieces =
+    Array.isArray(candidate.unplacedPieces) && candidate.unplacedPieces.length === 2
+      ? [
+          typeof candidate.unplacedPieces[0] === "number" ? candidate.unplacedPieces[0] : 12,
+          typeof candidate.unplacedPieces[1] === "number" ? candidate.unplacedPieces[1] : 12,
+        ] as [number, number]
+      : fallback.unplacedPieces;
+  const boardPieces =
+    Array.isArray(candidate.boardPieces) && candidate.boardPieces.length === 2
+      ? [
+          typeof candidate.boardPieces[0] === "number" ? candidate.boardPieces[0] : 0,
+          typeof candidate.boardPieces[1] === "number" ? candidate.boardPieces[1] : 0,
+        ] as [number, number]
+      : fallback.boardPieces;
+
+  return {
+    board,
+    currentPlayer,
+    phase,
+    unplacedPieces,
+    boardPieces,
+    selectedPoint: typeof candidate.selectedPoint === "number" ? candidate.selectedPoint : null,
+    removingPiece: Boolean(candidate.removingPiece),
+    winner: candidate.winner === 1 || candidate.winner === 2 ? candidate.winner : null,
+    gameOver: Boolean(candidate.gameOver),
+    lastAction:
+      typeof candidate.lastAction === "string" && candidate.lastAction.length > 0
+        ? candidate.lastAction
+        : fallback.lastAction,
+  };
+}
+
 function cloneState(state: MorrisState): MorrisState {
   return {
     ...state,
