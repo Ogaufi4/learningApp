@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, BookOpenText, Grid2x2, Swords } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,7 +31,15 @@ export default function GamesPage() {
     <div className="space-y-8">
       <div className="rounded-[2rem] border border-slate-200 bg-[linear-gradient(135deg,_#ecfccb_0%,_#ffffff_34%,_#f8fafc_100%)] p-8 shadow-sm">
         <div className="max-w-3xl">
-          <p className="mb-3 text-xs font-bold uppercase tracking-[0.24em] text-emerald-700">Games Hub</p>
+          <div className="mb-4 flex items-center gap-3">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-emerald-100 bg-white shadow-sm">
+              <Image src="/logo.png" alt="Puolingo logo" width={40} height={40} className="h-10 w-10 object-contain" priority />
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.24em] text-emerald-700">Puolingo Games</p>
+              <p className="text-sm font-semibold text-slate-500">Learning meets play</p>
+            </div>
+          </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
             Tlhopha motshameko o o batlang go o tshameka
           </h1>
