@@ -1,5 +1,14 @@
+import type { Metadata } from "next";
+
 type Props = {
   children: React.ReactNode;
+};
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 const LessonLayout = ({ children }: Props) => {
