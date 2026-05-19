@@ -7,14 +7,14 @@ import { Button } from "@/components/ui/button";
 
 const featureHighlights = [
   {
-    title: "Interactive Setswana lessons",
+    title: "Interactive Botswana language lessons",
     description:
-      "Build vocabulary and confidence with bite-sized practice designed to keep learners moving every day.",
+      "Build vocabulary and confidence with bite-sized practice designed to support learners across Botswana's languages.",
   },
   {
     title: "Culture-led language learning",
     description:
-      "Practice with Setswana phrases, proverbs, and wordplay that reflect Botswana's language and identity.",
+      "Practice with phrases, proverbs, and wordplay that reflect Botswana's languages, communities, and identity.",
   },
   {
     title: "Games that reinforce memory",
@@ -24,8 +24,8 @@ const featureHighlights = [
 ];
 
 const seoTopics = [
-  "Learn Setswana online at your own pace",
-  "Practice Setswana vocabulary and common phrases",
+  "Learn Botswana languages online at your own pace",
+  "Practice Setswana and other Botswana language skills",
   "Explore Botswana-inspired language games and activities",
 ];
 
@@ -37,12 +37,19 @@ export function HomePageClient() {
     <div className="flex min-h-screen flex-col bg-[linear-gradient(180deg,_#f7fee7_0%,_#ffffff_28%,_#f8fafc_100%)]">
       <header className="sticky top-0 z-50 border-b-2 border-slate-200 bg-white/95 px-4 backdrop-blur md:px-10">
         <div className="mx-auto flex h-[70px] max-w-6xl items-center justify-between">
-          <div className="flex items-center gap-x-3">
-            <Image src="/zebra_logo.png" height={40} width={40} alt="Puolingo zebra logo" className="rounded-lg" />
-            <div>
-              <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-emerald-600">Learn Setswana</p>
-              <p className="text-2xl font-extrabold tracking-tighter text-[#58cc02]">Puolingo</p>
+          <div className="flex items-center gap-x-8">
+            <div className="flex items-center gap-x-3">
+              <Image src="/zebra_logo.png" height={40} width={40} alt="Puolingo zebra logo" className="rounded-lg" />
+              <div>
+                <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-emerald-600">Botswana Languages</p>
+                <p className="text-2xl font-extrabold tracking-tighter text-[#58cc02]">Puolingo</p>
+              </div>
             </div>
+            <nav className="hidden items-center gap-x-2 md:flex">
+              <Button variant="ghost" className="font-bold text-slate-600 hover:text-emerald-700" onClick={() => router.push("/games")}>
+                Games
+              </Button>
+            </nav>
           </div>
           {!user ? (
             <Button variant="ghost" className="font-bold text-slate-500 hover:text-slate-600" onClick={() => router.push("/login")}>
@@ -75,11 +82,11 @@ export function HomePageClient() {
               </p>
               <div className="space-y-4 text-center lg:text-left">
                 <h1 className="text-4xl font-extrabold leading-tight text-neutral-900 md:text-6xl">
-                  Learn Setswana online with fun lessons, speaking practice, and culture-rich games.
+                  Learn Botswana languages online with fun lessons, speaking practice, and culture-rich games.
                 </h1>
                 <p className="mx-auto max-w-[620px] text-lg font-medium leading-8 text-slate-600 lg:mx-0">
-                  Puolingo is a free, engaging way to learn Setswana. Practice everyday vocabulary, explore
-                  Botswana-inspired language games, and build confidence one lesson at a time.
+                  Puolingo is a free, engaging way to explore Botswana languages, including Setswana. Practice everyday
+                  vocabulary, discover culture-rich activities, and build confidence one lesson at a time.
                 </p>
               </div>
 
@@ -128,10 +135,10 @@ export function HomePageClient() {
           <div className="mx-auto max-w-6xl rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm md:p-8">
             <div className="max-w-3xl">
               <p className="text-xs font-bold uppercase tracking-[0.24em] text-emerald-700">Why learners choose Puolingo</p>
-              <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900">A better way to learn Setswana online</h2>
+              <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900">A better way to learn Botswana languages online</h2>
               <p className="mt-3 text-base font-medium leading-7 text-slate-600">
-                The experience is designed to make Setswana more approachable for beginners, more enjoyable for returning
-                speakers, and more visible as a language worth learning globally.
+                The experience is designed to make Botswana languages more approachable for beginners, more enjoyable for
+                returning speakers, and more visible to learners everywhere.
               </p>
             </div>
 
@@ -156,7 +163,8 @@ export function HomePageClient() {
               <article className="rounded-[1.5rem] border border-white/70 bg-white/85 p-5">
                 <h3 className="text-lg font-extrabold text-slate-900">Learn core vocabulary</h3>
                 <p className="mt-2 text-sm font-medium leading-6 text-slate-600">
-                  Follow guided lessons that introduce useful Setswana words and phrases in a simple, repeatable flow.
+                  Follow guided lessons that introduce useful words and phrases from Botswana languages in a simple,
+                  repeatable flow.
                 </p>
               </article>
               <article className="rounded-[1.5rem] border border-white/70 bg-white/85 p-5">

@@ -2,21 +2,13 @@
 
 import Link from "next/link";
 import gameData from "../../../../data/setswana-game.json";
-import { ArrowRight, BookMarked, Lightbulb, ScrollText } from "lucide-react";
+import { ArrowRight, Lightbulb, ScrollText } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import type { SetswanaGameData } from "@/types/games";
 
 const setswanaGameData = gameData as SetswanaGameData;
 
 const hubItems = [
-  {
-    href: "/games/setswana/mohele",
-    title: "Mohele",
-    description: "Karolo e e ikemetseng ya motshameko wa puo. E siamiseditswe go amogela dikagare tse dingwe morago.",
-    badge: "Soon",
-    icon: BookMarked,
-    accentClassName: "bg-slate-100 text-slate-700",
-  },
   {
     href: "/games/setswana/diane",
     title: "Diane",
@@ -42,15 +34,15 @@ export default function SetswanaGamesPage() {
         <div className="max-w-3xl">
           <p className="mb-3 text-xs font-bold uppercase tracking-[0.24em] text-amber-700">Setswana Hub</p>
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
-            Mohele, Diane le Dithamalakane
+            Diane le Dithamalakane
           </h1>
           <p className="mt-3 text-base font-medium leading-7 text-slate-600">
-            Tlhopha karolo e o batlang go simolola ka yone. Re ka oketsa ditshwantsho, medumo le dikagare tse dingwe mo hubong ono motlhofo.
+            Tlhopha karolo e o batlang go simolola ka yone. Fa o batla go tshameka Mohele, e fitlhele mo Twelve Men's Morris ka fa ntle ga hub eno.
           </p>
         </div>
       </div>
 
-      <div className="grid gap-5 md:grid-cols-3">
+      <div className="grid gap-5 md:grid-cols-2">
         {hubItems.map((item) => {
           const Icon = item.icon;
           return (
