@@ -1,7 +1,7 @@
 export const defaultSiteName = "Puolingo";
-export const defaultTitle = "Learn Setswana with Puolingo";
+export const defaultTitle = "Learn Botswana Languages with Puolingo";
 export const defaultDescription =
-  "Puolingo helps learners build Setswana vocabulary, speaking confidence, and cultural knowledge through interactive lessons and games.";
+  "Puolingo helps learners explore Botswana languages, build speaking confidence, and grow cultural knowledge through interactive lessons and games.";
 
 function normalizeUrl(rawUrl: string) {
   const value = rawUrl.trim();
