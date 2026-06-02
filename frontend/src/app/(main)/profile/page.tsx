@@ -17,9 +17,10 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { userApi } from "@/lib/api/auth";
+import { authApi, userApi } from "@/lib/api/auth";
 import { Flame } from "lucide-react";
 import { formatAssetUrl } from "@/lib/utils";
+import { passwordRuleText, validatePassword } from "@/lib/auth/password";
 
 export default function ProfilePage() {
   const { user, updateUser, fetchUser, isLoading } = useAuthStore();
@@ -29,6 +30,10 @@ export default function ProfilePage() {
   const [fullName, setFullName] = useState(user?.full_name || "");
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordLoading, setPasswordLoading] = useState(false);
 
   useEffect(() => {
     if (user?.full_name) {
@@ -97,6 +102,39 @@ export default function ProfilePage() {
       toast.error("Failed to update profile");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePasswordSave = async () => {
+    const passwordError = validatePassword(newPassword);
+    if (passwordError) {
+      toast.error(passwordError);
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    setPasswordLoading(true);
+    try {
+      const response = await authApi.changePassword({
+        current_password: user.has_password ? currentPassword : undefined,
+        new_password: newPassword,
+      });
+      updateUser(response.user);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      toast.success(response.detail);
+    } catch (error) {
+      const message =
+        (error as { response?: { data?: { detail?: string } } }).response?.data?.detail ||
+        "Failed to update password";
+      toast.error(message);
+    } finally {
+      setPasswordLoading(false);
     }
   };
 
@@ -215,6 +253,72 @@ export default function ProfilePage() {
                          </div>
                      </div>
                  </div>
+            </div>
+
+            <Separator className="my-8" />
+
+            <div className="w-full max-w-xl space-y-4">
+              <div>
+                <h2 className="text-xl font-bold text-neutral-800">
+                  {user.has_password ? "Change Password" : "Set Password"}
+                </h2>
+                <p className="mt-1 text-sm font-medium text-neutral-500">
+                  {user.has_password
+                    ? "Update your password to keep your account secure."
+                    : "Add a password so you can also sign in with email and password."}
+                </p>
+              </div>
+
+              <div className="rounded-3xl border-2 border-neutral-200 p-5 shadow-sm">
+                <div className="space-y-4">
+                  {user.has_password ? (
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="current_password" className="font-bold text-neutral-600">Current Password</Label>
+                      <Input
+                        id="current_password"
+                        type="password"
+                        value={currentPassword}
+                        onChange={(event) => setCurrentPassword(event.target.value)}
+                        className="border-none bg-neutral-100 focus-visible:ring-2 focus-visible:ring-green-500"
+                        placeholder="Enter your current password"
+                      />
+                    </div>
+                  ) : null}
+
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="new_password" className="font-bold text-neutral-600">
+                      {user.has_password ? "New Password" : "Create Password"}
+                    </Label>
+                    <Input
+                      id="new_password"
+                      type="password"
+                      value={newPassword}
+                      onChange={(event) => setNewPassword(event.target.value)}
+                      className="border-none bg-neutral-100 focus-visible:ring-2 focus-visible:ring-green-500"
+                      placeholder={user.has_password ? "Enter a new password" : "Create a password"}
+                    />
+                    <p className="text-xs font-medium text-neutral-500">{passwordRuleText}</p>
+                  </div>
+
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="confirm_password" className="font-bold text-neutral-600">Confirm Password</Label>
+                    <Input
+                      id="confirm_password"
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(event) => setConfirmPassword(event.target.value)}
+                      className="border-none bg-neutral-100 focus-visible:ring-2 focus-visible:ring-green-500"
+                      placeholder="Repeat your password"
+                    />
+                  </div>
+
+                  <Button variant="secondary" onClick={handlePasswordSave} disabled={passwordLoading}>
+                    {passwordLoading
+                      ? (user.has_password ? "Updating..." : "Saving...")
+                      : (user.has_password ? "Change Password" : "Set Password")}
+                  </Button>
+                </div>
+              </div>
             </div>
         </div>
       </FeedWrapper>

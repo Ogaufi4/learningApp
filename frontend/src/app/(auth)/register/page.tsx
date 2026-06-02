@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useAuthStore } from "@/store/auth";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { passwordRuleText, validatePassword } from "@/lib/auth/password";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -18,8 +19,9 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (password.length < 8) {
-      toast.error("Password must be at least 8 characters");
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      toast.error(passwordError);
       return;
     }
 
@@ -102,7 +104,7 @@ export default function RegisterPage() {
               className="w-full px-4 py-4 bg-slate-100 border-2 border-slate-200 rounded-2xl focus:outline-none focus:border-[#58cc02] transition font-medium"
               placeholder="Create a password"
             />
-            <p className="text-xs text-neutral-500 font-medium">Minimum 8 characters</p>
+            <p className="text-xs text-neutral-500 font-medium">{passwordRuleText}</p>
           </div>
 
           <Button

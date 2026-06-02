@@ -2,8 +2,12 @@
 import bcrypt from "bcryptjs";
 import { type NextRequest, NextResponse } from "next/server";
 import type { TransactionSql } from "postgres";
+import { validatePassword } from "@/lib/auth/password";
 import { createAccessToken, createRefreshToken, verifyToken } from "@/lib/server/auth";
+import { sendPasswordResetEmail } from "@/lib/server/email";
+import { verifyFirebaseIdToken } from "@/lib/server/firebase-auth";
 import { ensureAppSchema, getSql, sql } from "@/lib/server/db";
+import { createPasswordResetToken, getPasswordResetUrl, hashPasswordResetToken } from "@/lib/server/reset-password";
 import { uploadPublicFile } from "@/lib/server/storage";
 
 export const runtime = "nodejs";
@@ -34,6 +38,13 @@ type DbUser = {
   updated_at?: string;
 };
 
+type PasswordResetTokenRow = {
+  id: number;
+  user_id: number;
+  expires_at: string;
+  used_at: string | null;
+};
+
 type CachedValue<T> = {
   data: T;
   expiresAt: number;
@@ -42,7 +53,6 @@ type CachedValue<T> = {
 const ADMIN_CACHE_TTL_MS = 30_000;
 let adminCoursesTreeCache: CachedValue<any[]> | null = null;
 let adminAnalyticsCache: CachedValue<Record<string, unknown>> | null = null;
-
 function json(data: unknown, init?: ResponseInit) {
   return NextResponse.json(data, init);
 }
@@ -66,6 +76,18 @@ function hasOwn(body: unknown, key: string) {
 function parseOptionalNumber(value: unknown) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+function normalizeEmail(value: string) {
+  return value.trim().toLowerCase();
+}
+
+function getErrorMessage(error: unknown, fallback: string) {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  return fallback;
 }
 
 function getFileExtension(file: File) {
@@ -127,9 +149,100 @@ function serializeUser(user: DbUser) {
     last_activity_date: user.last_activity_date,
     longest_streak: user.longest_streak,
     streak_frozen: user.streak_frozen,
+    has_password: Boolean(user.hashed_password),
     created_at: user.created_at,
     updated_at: user.updated_at,
   };
+}
+
+async function findUserById(userId: number) {
+  const users = (await sql`
+    select
+      id,
+      email,
+      full_name,
+      hashed_password,
+      is_active,
+      is_admin,
+      image_src,
+      hearts,
+      points,
+      xp,
+      streak_count,
+      last_activity_date::text,
+      longest_streak,
+      streak_frozen,
+      created_at::text,
+      updated_at::text
+    from users
+    where id = ${userId}
+    limit 1
+  `) as unknown as DbUser[];
+
+  return users[0] ?? null;
+}
+
+async function findUserByEmail(email: string) {
+  const normalizedEmail = normalizeEmail(email);
+  const users = (await sql`
+    select
+      id,
+      email,
+      full_name,
+      hashed_password,
+      is_active,
+      is_admin,
+      image_src,
+      hearts,
+      points,
+      xp,
+      streak_count,
+      last_activity_date::text,
+      longest_streak,
+      streak_frozen,
+      created_at::text,
+      updated_at::text
+    from users
+    where lower(email) = lower(${normalizedEmail})
+    limit 1
+  `) as unknown as DbUser[];
+
+  return users[0] ?? null;
+}
+
+async function savePasswordResetToken(userId: number) {
+  const { expiresAt, token, tokenHash } = createPasswordResetToken();
+
+  await getSql().begin(async (tx) => {
+    await tx`
+      update password_reset_tokens
+      set used_at = now()
+      where user_id = ${userId} and used_at is null
+    `;
+
+    await tx`
+      insert into password_reset_tokens (user_id, token_hash, expires_at, created_at)
+      values (${userId}, ${tokenHash}, ${expiresAt.toISOString()}, now())
+    `;
+  });
+
+  return token;
+}
+
+async function markPasswordResetTokenUsed(tokenId: number, userId: number, hashedPassword: string) {
+  await getSql().begin(async (tx) => {
+    await tx`
+      update users
+      set hashed_password = ${hashedPassword}, updated_at = now()
+      where id = ${userId}
+    `;
+
+    await tx`
+      update password_reset_tokens
+      set used_at = now()
+      where id = ${tokenId}
+    `;
+  });
 }
 
 async function readJson(request: NextRequest) {
@@ -177,30 +290,7 @@ async function getCurrentUser(request: NextRequest, requireAuth = true) {
     throw new Error("Unauthorized");
   }
 
-  const users = (await sql`
-    select
-      id,
-      email,
-      full_name,
-      hashed_password,
-      is_active,
-      is_admin,
-      image_src,
-      hearts,
-      points,
-      xp,
-      streak_count,
-      last_activity_date::text,
-      longest_streak,
-      streak_frozen,
-      created_at::text,
-      updated_at::text
-    from users
-    where id = ${userId}
-    limit 1
-  `) as unknown as DbUser[];
-
-  const user = users[0] ?? null;
+  const user = await findUserById(userId);
   if (!user && requireAuth) {
     throw new Error("Unauthorized");
   }
@@ -674,32 +764,10 @@ async function handleGet(request: NextRequest, slug: string[]) {
 async function handlePost(request: NextRequest, slug: string[]) {
   if (slug[0] === "auth" && slug[1] === "login") {
     const form = await request.formData();
-    const username = String(form.get("username") ?? "");
+    const username = normalizeEmail(String(form.get("username") ?? ""));
     const password = String(form.get("password") ?? "");
 
-    const users = (await sql`
-      select
-        id,
-        email,
-        full_name,
-        hashed_password,
-        is_active,
-        is_admin,
-        image_src,
-        hearts,
-        points,
-        xp,
-        streak_count,
-        last_activity_date::text,
-        longest_streak,
-        streak_frozen,
-        created_at::text,
-        updated_at::text
-      from users
-      where lower(email) = lower(${username})
-      limit 1
-    `) as unknown as DbUser[];
-    const user = users[0];
+    const user = await findUserByEmail(username);
 
     if (!user?.hashed_password || !(await bcrypt.compare(password, user.hashed_password))) {
       return errorResponse("Incorrect email or password", 401);
@@ -720,7 +788,7 @@ async function handlePost(request: NextRequest, slug: string[]) {
       full_name?: string;
     } | null;
 
-    const email = body?.email?.trim().toLowerCase();
+    const email = body?.email ? normalizeEmail(body.email) : "";
     const password = body?.password ?? "";
     const fullName = body?.full_name?.trim() || null;
 
@@ -728,17 +796,13 @@ async function handlePost(request: NextRequest, slug: string[]) {
       return errorResponse("Email and password are required", 400);
     }
 
-    if (password.length < 8) {
-      return errorResponse("Password must be at least 8 characters", 400);
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      return errorResponse(passwordError, 400);
     }
 
-    const existing = (await sql`
-      select id
-      from users
-      where lower(email) = lower(${email})
-      limit 1
-    `) as unknown as { id: number }[];
-    if (existing.length > 0) {
+    const existing = await findUserByEmail(email);
+    if (existing) {
       return errorResponse("A user with that email already exists", 400);
     }
 
@@ -796,6 +860,151 @@ async function handlePost(request: NextRequest, slug: string[]) {
     return json(serializeUser(inserted[0]), { status: 201 });
   }
 
+  if (slug[0] === "auth" && (slug[1] === "firebase" || slug[1] === "google")) {
+    const body = (await readJson(request)) as { id_token?: string; token?: string } | null;
+    const idToken = body?.token || body?.id_token;
+    if (!idToken) {
+      return errorResponse("Firebase ID token is required", 400);
+    }
+
+    let payload;
+    try {
+      payload = await verifyFirebaseIdToken(idToken);
+    } catch (error) {
+      return errorResponse(getErrorMessage(error, "Failed to verify Firebase sign-in"), 401);
+    }
+
+    const email = payload.email ? normalizeEmail(payload.email) : "";
+    if (!email) {
+      return errorResponse("Firebase account email is required", 400);
+    }
+
+    const firebaseUid = payload.sub;
+    const fullName = payload.name?.trim() || null;
+    const imageSrc = payload.picture?.trim() || null;
+
+    const user = await getSql().begin(async (tx) => {
+      const existingRows = (await tx`
+        select
+          id,
+          email,
+          full_name,
+          hashed_password,
+          is_active,
+          is_admin,
+          image_src,
+          hearts,
+          points,
+          xp,
+          streak_count,
+          last_activity_date::text,
+          longest_streak,
+          streak_frozen,
+          created_at::text,
+          updated_at::text
+        from users
+        where lower(email) = lower(${email}) or firebase_id = ${firebaseUid}
+        order by case when lower(email) = lower(${email}) then 0 else 1 end
+        limit 1
+      `) as unknown as DbUser[];
+
+      const existingUser = existingRows[0];
+      if (existingUser) {
+        const updatedRows = (await tx`
+          update users
+          set
+            firebase_id = ${firebaseUid},
+            full_name = ${existingUser.full_name || fullName},
+            image_src = ${existingUser.image_src || imageSrc},
+            updated_at = now()
+          where id = ${existingUser.id}
+          returning
+            id,
+            email,
+            full_name,
+            hashed_password,
+            is_active,
+            is_admin,
+            image_src,
+            hearts,
+            points,
+            xp,
+            streak_count,
+            last_activity_date::text,
+            longest_streak,
+            streak_frozen,
+            created_at::text,
+            updated_at::text
+        `) as unknown as DbUser[];
+
+        return updatedRows[0];
+      }
+
+      const insertedRows = (await tx`
+        insert into users (
+          email,
+          full_name,
+          firebase_id,
+          image_src,
+          hashed_password,
+          is_active,
+          is_admin,
+          hearts,
+          points,
+          xp,
+          streak_count,
+          longest_streak,
+          streak_frozen,
+          created_at,
+          updated_at
+        )
+        values (
+          ${email},
+          ${fullName},
+          ${firebaseUid},
+          ${imageSrc},
+          null,
+          true,
+          false,
+          5,
+          0,
+          0,
+          0,
+          0,
+          false,
+          now(),
+          now()
+        )
+        returning
+          id,
+          email,
+          full_name,
+          hashed_password,
+          is_active,
+          is_admin,
+          image_src,
+          hearts,
+          points,
+          xp,
+          streak_count,
+          last_activity_date::text,
+          longest_streak,
+          streak_frozen,
+          created_at::text,
+          updated_at::text
+      `) as unknown as DbUser[];
+
+      return insertedRows[0];
+    });
+
+    return json({
+      access_token: await createAccessToken(user.id),
+      token_type: "bearer",
+      refresh_token: await createRefreshToken(user.id),
+      user: serializeUser(user),
+    });
+  }
+
   if (slug[0] === "auth" && slug[1] === "refresh") {
     const body = (await readJson(request)) as { refresh_token?: string } | null;
     if (!body?.refresh_token) {
@@ -811,6 +1020,135 @@ async function handlePost(request: NextRequest, slug: string[]) {
       access_token: await createAccessToken(Number(payload.sub)),
       token_type: "bearer",
       refresh_token: await createRefreshToken(Number(payload.sub)),
+    });
+  }
+
+  if (slug[0] === "auth" && slug[1] === "forgot-password") {
+    const body = (await readJson(request)) as { email?: string } | null;
+    const email = body?.email ? normalizeEmail(body.email) : "";
+
+    if (email) {
+      const user = await findUserByEmail(email);
+      if (user) {
+        const token = await savePasswordResetToken(user.id);
+        const resetUrl = getPasswordResetUrl(token);
+
+        try {
+          await sendPasswordResetEmail({ resetUrl, to: user.email });
+        } catch (error) {
+          console.error(getErrorMessage(error, "Failed to send password reset email"));
+        }
+      }
+    }
+
+    return json({
+      detail: "If an account exists for that email, a reset link has been sent.",
+    });
+  }
+
+  if (slug[0] === "auth" && slug[1] === "reset-password") {
+    const body = (await readJson(request)) as {
+      token?: string;
+      new_password?: string;
+    } | null;
+
+    const token = body?.token?.trim() || "";
+    const newPassword = body?.new_password ?? "";
+
+    if (!token || !newPassword) {
+      return errorResponse("Reset token and new password are required", 400);
+    }
+
+    const passwordError = validatePassword(newPassword);
+    if (passwordError) {
+      return errorResponse(passwordError, 400);
+    }
+
+    const tokenHash = hashPasswordResetToken(token);
+    const tokenRows = (await sql`
+      select
+        id,
+        user_id,
+        expires_at::text,
+        used_at::text
+      from password_reset_tokens
+      where token_hash = ${tokenHash}
+      limit 1
+    `) as unknown as PasswordResetTokenRow[];
+
+    const resetToken = tokenRows[0];
+    if (!resetToken || resetToken.used_at || new Date(resetToken.expires_at).getTime() <= Date.now()) {
+      return errorResponse("This reset link is invalid or has expired", 400);
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await markPasswordResetTokenUsed(resetToken.id, resetToken.user_id, hashedPassword);
+
+    return json({ detail: "Password reset successful" });
+  }
+
+  if (slug[0] === "auth" && slug[1] === "change-password") {
+    const user = await getRequiredUser(request);
+    const body = (await readJson(request)) as {
+      current_password?: string;
+      new_password?: string;
+    } | null;
+
+    const currentPassword = body?.current_password ?? "";
+    const newPassword = body?.new_password ?? "";
+    if (!newPassword) {
+      return errorResponse("New password is required", 400);
+    }
+
+    const passwordError = validatePassword(newPassword);
+    if (passwordError) {
+      return errorResponse(passwordError, 400);
+    }
+
+    if (user.hashed_password) {
+      if (!currentPassword) {
+        return errorResponse("Current password is required", 400);
+      }
+
+      const passwordMatches = await bcrypt.compare(currentPassword, user.hashed_password);
+      if (!passwordMatches) {
+        return errorResponse("Current password is incorrect", 400);
+      }
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const rows = (await sql`
+      update users
+      set hashed_password = ${hashedPassword}, updated_at = now()
+      where id = ${user.id}
+      returning
+        id,
+        email,
+        full_name,
+        hashed_password,
+        is_active,
+        is_admin,
+        image_src,
+        hearts,
+        points,
+        xp,
+        streak_count,
+        last_activity_date::text,
+        longest_streak,
+        streak_frozen,
+        created_at::text,
+        updated_at::text
+    `) as unknown as DbUser[];
+
+    await sql`
+      update password_reset_tokens
+      set used_at = now()
+      where user_id = ${user.id} and used_at is null
+    `;
+
+    return json({
+      detail: user.hashed_password ? "Password changed successfully" : "Password set successfully",
+      user: serializeUser(rows[0]),
     });
   }
 
