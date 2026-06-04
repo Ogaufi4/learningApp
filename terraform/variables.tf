@@ -31,7 +31,7 @@ variable "db_instance_class" {
 variable "db_name" {
   description = "Database name"
   type        = string
-  default     = "puolingo"
+  default     = "diteme"
 }
 
 variable "db_username" {
@@ -75,3 +75,4 @@ variable "desired_count" {
   type        = number
   default     = 1
 }
+

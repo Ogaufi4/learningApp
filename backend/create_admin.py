@@ -14,7 +14,7 @@ async def create_admin_user():
     async with AsyncSessionLocal() as db:
         # Check if admin already exists
         from sqlalchemy import select
-        result = await db.execute(select(User).where(User.email == "admin@puolingo.com"))
+        result = await db.execute(select(User).where(User.email == "admin@diteme.com"))
         existing_admin = result.scalar_one_or_none()
         
         if existing_admin:
@@ -23,7 +23,7 @@ async def create_admin_user():
         
         # Create admin user
         admin_user = User(
-            email="admin@puolingo.com",
+            email="admin@diteme.com",
             full_name="Admin User",
             hashed_password=get_password_hash("admin123"),  # Default password
             is_active=True,
@@ -40,9 +40,10 @@ async def create_admin_user():
         await db.commit()
         
         print("✅ Admin user created successfully!")
-        print("📧 Email: admin@puolingo.com")
+        print("📧 Email: admin@diteme.com")
         print("🔑 Password: admin123")
         print("\n⚠️  IMPORTANT: Change this password in production!")
 
 if __name__ == "__main__":
     asyncio.run(create_admin_user())
+

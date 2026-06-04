@@ -33,9 +33,9 @@ export function GamesLayoutClient({ children }: Props) {
       <header className="border-b border-emerald-100 bg-white/85 backdrop-blur">
         <div className="mx-auto flex max-w-[1180px] items-center justify-between px-6 py-4">
           <Link href="/learn" className="flex items-center gap-3">
-            <Image src="/zebra_logo.png" alt="Puolingo" width={42} height={42} className="rounded-xl shadow-sm" />
+            <Image src="/zebra_logo.png" alt="Diteme" width={42} height={42} className="rounded-xl shadow-sm" />
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.24em] text-emerald-700">Puolingo</p>
+              <p className="text-xs font-bold uppercase tracking-[0.24em] text-emerald-700">Diteme</p>
               <h1 className="text-xl font-extrabold tracking-tight text-slate-900">Games</h1>
             </div>
           </Link>
@@ -51,3 +51,4 @@ export function GamesLayoutClient({ children }: Props) {
     </div>
   );
 }
+

@@ -456,14 +456,14 @@ export function TwelveMensMorrisGame() {
           <div className="max-w-2xl">
             <div className="mb-4 flex items-center gap-3">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-emerald-100 bg-white shadow-sm">
-                <Image src="/logo.png" alt="Puolingo logo" width={40} height={40} className="h-10 w-10 object-contain" priority />
+                <Image src="/logo.png" alt="Diteme logo" width={40} height={40} className="h-10 w-10 object-contain" priority />
               </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.24em] text-emerald-700">Puolingo Games</p>
+                <p className="text-xs font-bold uppercase tracking-[0.24em] text-emerald-700">Diteme Games</p>
                 <p className="text-sm font-semibold text-slate-500">Play with friends or side-by-side</p>
               </div>
             </div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Play Twelve Men&apos;s Morris inside Puolingo</h1>
+            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Play Twelve Men&apos;s Morris inside Diteme</h1>
             <p className="mt-3 text-base font-medium text-slate-600">
               Start a local match or create a private room with an invite code so a second player can join.
             </p>
@@ -686,3 +686,4 @@ export function TwelveMensMorrisGame() {
     </div>
   );
 }
+

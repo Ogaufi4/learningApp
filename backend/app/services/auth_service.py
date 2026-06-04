@@ -21,7 +21,7 @@ class AuthService:
             return None
             
         # Special case: Ensure the default admin user always has admin privileges
-        if email == "admin@puolingo.com" and not user.is_admin:
+        if email == "admin@diteme.com" and not user.is_admin:
             user.is_admin = True
             self.db.add(user)
             await self.db.commit()
@@ -100,7 +100,7 @@ class AuthService:
                 hearts=5,
                 xp=0,
                 streak_count=0,
-                is_admin=(email == "admin@puolingo.com") # Set admin if email matches
+                is_admin=(email == "admin@diteme.com") # Set admin if email matches
             )
             self.db.add(db_user)
             await self.db.commit()
@@ -120,7 +120,7 @@ class AuthService:
                 should_update = True
             
             # Special case: Ensure the default admin user always has admin privileges
-            if email == "admin@puolingo.com" and not user.is_admin:
+            if email == "admin@diteme.com" and not user.is_admin:
                 user.is_admin = True
                 should_update = True
             
@@ -130,3 +130,4 @@ class AuthService:
                 await self.db.refresh(user)
             
             return user
+

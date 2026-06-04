@@ -24,7 +24,7 @@ Since Docker Desktop is not running, here are your options:
    Username [postgres]: (press Enter)
    Password: (enter your password)
 
-   postgres=# CREATE DATABASE puolingo;
+   postgres=# CREATE DATABASE diteme;
    postgres=# \q
    ```
 
@@ -32,7 +32,7 @@ Since Docker Desktop is not running, here are your options:
    If you used a different password, update the `.env` file:
 
    ```
-   DATABASE_URL=postgresql+asyncpg://postgres:YOUR_PASSWORD@localhost:5432/puolingo
+   DATABASE_URL=postgresql+asyncpg://postgres:YOUR_PASSWORD@localhost:5432/diteme
    DB_POOL_MODE=direct
    DB_SSL_MODE=disable
    ```
@@ -50,7 +50,7 @@ If you have Docker Desktop installed but it's not running:
 2. Wait for it to start (may take 1-2 minutes)
 3. Then run:
    ```powershell
-   docker run --name puolingo-postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=puolingo -p 5432:5432 -d postgres:15
+   docker run --name diteme-postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=diteme -p 5432:5432 -d postgres:15
    ```
 
 ## Option 3: Use a Cloud Database (Free Tier)
@@ -85,3 +85,4 @@ INFO:     Application startup complete.
 ```
 
 Then visit: http://localhost:8000/docs
+

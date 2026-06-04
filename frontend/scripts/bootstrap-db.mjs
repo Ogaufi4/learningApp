@@ -183,7 +183,7 @@ async function ensureSchema() {
 }
 
 async function ensureAdminUser() {
-  const adminEmail = process.env.ADMIN_EMAIL || "admin@puolingo.com";
+  const adminEmail = process.env.ADMIN_EMAIL || "admin@diteme.com";
   const adminPassword = process.env.ADMIN_PASSWORD || "admin123";
   const fullName = process.env.ADMIN_FULL_NAME || "Admin User";
   const hashedPassword = await bcrypt.hash(adminPassword, 10);
@@ -444,3 +444,4 @@ try {
 } finally {
   await sql.end();
 }
+

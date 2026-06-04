@@ -1,7 +1,7 @@
-export const defaultSiteName = "Puolingo";
-export const defaultTitle = "Learn Botswana Languages with Puolingo";
+export const defaultSiteName = "Diteme";
+export const defaultTitle = "Learn Botswana Languages with Diteme";
 export const defaultDescription =
-  "Puolingo helps learners explore Botswana languages, build speaking confidence, and grow cultural knowledge through interactive lessons and games.";
+  "Diteme helps learners explore Botswana languages, build speaking confidence, and grow cultural knowledge through interactive lessons and games.";
 
 function normalizeUrl(rawUrl: string) {
   const value = rawUrl.trim();
@@ -51,3 +51,4 @@ export function getAbsoluteUrl(pathname = "/") {
 
   return new URL(normalizedPath, `${baseUrl}/`).toString();
 }
+

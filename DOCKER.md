@@ -35,7 +35,7 @@ This guide explains how to run the Learning Application using Docker.
 ### PostgreSQL Database
 
 - **Port**: 5432
-- **Database**: puolingo
+- **Database**: diteme
 - **User**: postgres
 - **Password**: postgres (change in production!)
 
@@ -138,8 +138,8 @@ docker-compose logs backend
 - Verify `NEXT_PUBLIC_API_URL` in `.env`
 - Check backend health: http://localhost:8000/health
 - For EC2/public deployments, make sure backend `FRONTEND_URL` and `ALLOWED_ORIGINS`
-  include your public site origin(s) (for example `https://puolingo.com`)
-- Prefer domain-based API URLs (for example `https://puolingo.com/api/v1`) instead of raw IPs
+  include your public site origin(s) (for example `https://diteme.com`)
+- Prefer domain-based API URLs (for example `https://diteme.com/api/v1`) instead of raw IPs
 
 ### DNS Resolution Issues (Docker for Windows)
 
@@ -196,3 +196,5 @@ docker-compose build
 docker-compose up -d --no-deps --build backend
 docker-compose up -d --no-deps --build frontend
 ```
+
+

@@ -33,10 +33,10 @@ export default function GamesPage() {
         <div className="max-w-3xl">
           <div className="mb-4 flex items-center gap-3">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-emerald-100 bg-white shadow-sm">
-              <Image src="/logo.png" alt="Puolingo logo" width={40} height={40} className="h-10 w-10 object-contain" priority />
+              <Image src="/logo.png" alt="Diteme logo" width={40} height={40} className="h-10 w-10 object-contain" priority />
             </div>
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.24em] text-emerald-700">Puolingo Games</p>
+              <p className="text-xs font-bold uppercase tracking-[0.24em] text-emerald-700">Diteme Games</p>
               <p className="text-sm font-semibold text-slate-500">Learning meets play</p>
             </div>
           </div>
@@ -44,7 +44,7 @@ export default function GamesPage() {
             Tlhopha motshameko o o batlang go o tshameka
           </h1>
           <p className="mt-3 text-base font-medium leading-7 text-slate-600">
-            `/games` jaanong ke lefelo la gago la motshameko mo Puolingo. Re ka oketsa le mengwe motlhofo mo nakong e e tlang.
+            `/games` jaanong ke lefelo la gago la motshameko mo Diteme. Re ka oketsa le mengwe motlhofo mo nakong e e tlang.
           </p>
         </div>
       </div>
@@ -93,3 +93,4 @@ export default function GamesPage() {
     </div>
   );
 }
+

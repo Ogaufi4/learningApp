@@ -43,7 +43,7 @@ export default function LoginPage() {
       <Link href="/" className="flex items-center gap-x-3 mb-12 hover:opacity-80 transition group">
         <Image src="/zebra_logo.png" height={50} width={50} alt="Logo" className="rounded-xl shadow-lg border-2 border-white group-hover:scale-110 transition duration-300" />
         <h1 className="text-4xl font-extrabold text-[#58cc02] tracking-tighter">
-          Puolingo
+          Diteme
         </h1>
       </Link>
 
@@ -131,3 +131,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

@@ -44,7 +44,7 @@ python create_admin.py
 
 This creates an admin account with:
 
-- **Email**: `admin@puolingo.com`
+- **Email**: `admin@diteme.com`
 - **Password**: `admin123`
 
 ⚠️ **IMPORTANT**: Change this password immediately after first login!
@@ -56,7 +56,7 @@ This creates an admin account with:
    ```bash
    POST /api/v1/auth/login
    {
-     "username": "admin@puolingo.com",
+     "username": "admin@diteme.com",
      "password": "admin123"
    }
    ```

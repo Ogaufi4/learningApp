@@ -38,7 +38,7 @@ export default function ForgotPasswordPage() {
           alt="Logo"
           className="rounded-xl border-2 border-white shadow-lg transition duration-300 group-hover:scale-110"
         />
-        <h1 className="text-4xl font-extrabold tracking-tighter text-[#58cc02]">Puolingo</h1>
+        <h1 className="text-4xl font-extrabold tracking-tighter text-[#58cc02]">Diteme</h1>
       </Link>
 
       <div className="w-full max-w-md rounded-3xl border-2 border-slate-200 bg-white p-8">
@@ -80,3 +80,4 @@ export default function ForgotPasswordPage() {
     </div>
   );
 }
+

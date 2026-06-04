@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   description: defaultDescription,
   applicationName: defaultSiteName,
   keywords: [
-    "Puolingo",
+    "Diteme",
     "learn Setswana",
     "Setswana lessons",
     "Botswana language learning",
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
         url: "/opengraph-image",
         width: 1200,
         height: 630,
-        alt: "Puolingo preview for learning Setswana online",
+        alt: "Diteme preview for learning Setswana online",
       },
     ],
   },
@@ -111,3 +111,4 @@ export default function RootLayout({
     </html>
   );
 }
+

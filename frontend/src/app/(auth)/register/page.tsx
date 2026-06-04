@@ -27,7 +27,7 @@ export default function RegisterPage() {
 
     try {
       await register({ email, password, full_name: fullName });
-      toast.success("Account created! Welcome to Puolingo!");
+      toast.success("Account created! Welcome to Diteme!");
       router.push("/learn");
     } catch (error) {
       const message =
@@ -48,7 +48,7 @@ export default function RegisterPage() {
           className="rounded-xl shadow-lg border-2 border-white group-hover:scale-110 transition duration-300"
         />
         <h1 className="text-4xl font-extrabold text-[#58cc02] tracking-tighter">
-          Puolingo
+          Diteme
         </h1>
       </Link>
 
@@ -127,3 +127,4 @@ export default function RegisterPage() {
     </div>
   );
 }
+
