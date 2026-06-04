@@ -14,7 +14,7 @@ export default function AdminLoginPage() {
   const router = useRouter();
   const { login } = useAuthStore();
   const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState("admin@puolingo.com");
+  const [email, setEmail] = useState("admin@diteme.com");
   const [password, setPassword] = useState("admin123");
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -53,7 +53,7 @@ export default function AdminLoginPage() {
         />
         <div className="flex items-center gap-x-3">
           <h1 className="text-4xl font-extrabold text-[#58cc02] tracking-tighter">
-            Puolingo
+            Diteme
           </h1>
           <span className="rounded-full bg-slate-900 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-white">
             Admin
@@ -80,7 +80,7 @@ export default function AdminLoginPage() {
             <input
               id="email"
               type="email"
-              placeholder="admin@puolingo.com"
+              placeholder="admin@diteme.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -119,3 +119,4 @@ export default function AdminLoginPage() {
     </div>
   );
 }
+

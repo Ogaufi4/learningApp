@@ -22,7 +22,7 @@ def _firebase_project_id_from_env() -> str:
 
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "Puolingo API"
+    PROJECT_NAME: str = "Diteme API"
     API_V1_STR: str = "/api/v1"
     VERCEL_ENV: str = ""
     
@@ -45,10 +45,11 @@ class Settings(BaseSettings):
     GOOGLE_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/google/callback"
     
     FRONTEND_URL: str = "http://localhost:3000"
-    ALLOWED_ORIGINS: Union[List[str], str] = ["http://localhost:3000", "http://puolingo.com"]
+    ALLOWED_ORIGINS: Union[List[str], str] = ["http://localhost:3000", "http://diteme.com"]
     UPLOAD_DIR: str = "uploads"
     FIREBASE_PROJECT_ID: str = _firebase_project_id_from_env()
 
     model_config = SettingsConfigDict(case_sensitive=True, env_file=".env", extra="ignore")
 
 settings = Settings()
+

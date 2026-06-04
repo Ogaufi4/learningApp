@@ -7,7 +7,7 @@
 ```powershell
 # Install Docker Desktop if not already installed
 # Then run:
-docker run --name puolingo-postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=puolingo -p 5432:5432 -d postgres:15
+docker run --name diteme-postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=diteme -p 5432:5432 -d postgres:15
 ```
 
 ### Option 2: Install PostgreSQL Locally
@@ -17,7 +17,7 @@ docker run --name puolingo-postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB
 3. Open pgAdmin or psql and create the database:
 
 ```sql
-CREATE DATABASE puolingo;
+CREATE DATABASE diteme;
 ```
 
 ### Option 3: Use existing PostgreSQL
@@ -36,7 +36,7 @@ CREATE DATABASE duolingo_clone;
 Make sure your `.env` file has the correct connection string:
 
 ```env
-DATABASE_URL=postgresql+asyncpg://postgres:YOUR_PASSWORD@localhost:5432/puolingo
+DATABASE_URL=postgresql+asyncpg://postgres:YOUR_PASSWORD@localhost:5432/diteme
 ```
 
 Replace `YOUR_PASSWORD` with your actual PostgreSQL password.
@@ -52,3 +52,4 @@ The server will automatically create all tables on startup!
 ## Verify Setup
 
 Visit http://localhost:8000/docs to see the API documentation.
+

@@ -2,7 +2,7 @@
   "gameTitle": "Setswana Dithamalakane le Diane",
   "language": "tn",
   "version": "1.0.0",
-  "description": "A Puolingo-ready Setswana riddle and proverb quiz game with two categories: Dithamalakane and Diane.",
+  "description": "A Diteme-ready Setswana riddle and proverb quiz game with two categories: Dithamalakane and Diane.",
   "categories": [
     {
       "id": "dithamalakane",
@@ -86,3 +86,4 @@
     "backToCategories": "Boela kwa dikarolong"
   }
 }
+

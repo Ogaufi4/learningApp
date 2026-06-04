@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { HomePageClient } from "@/components/marketing/home-page-client";
 
 const homeDescription =
-  "Learn Botswana languages online with free lessons, pronunciation practice, and Botswana-inspired language games on Puolingo.";
+  "Learn Botswana languages online with free lessons, pronunciation practice, and Botswana-inspired language games on Diteme.";
 
 export const metadata: Metadata = {
   title: "Learn Botswana Languages Online for Free",
@@ -24,3 +24,4 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return <HomePageClient />;
 }
+

@@ -39,10 +39,10 @@ export function HomePageClient() {
         <div className="mx-auto flex h-[70px] max-w-6xl items-center justify-between">
           <div className="flex items-center gap-x-8">
             <div className="flex items-center gap-x-3">
-              <Image src="/zebra_logo.png" height={40} width={40} alt="Puolingo zebra logo" className="rounded-lg" />
+              <Image src="/zebra_logo.png" height={40} width={40} alt="Diteme zebra logo" className="rounded-lg" />
               <div>
                 <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-emerald-600">Botswana Languages</p>
-                <p className="text-2xl font-extrabold tracking-tighter text-[#58cc02]">Puolingo</p>
+                <p className="text-2xl font-extrabold tracking-tighter text-[#58cc02]">Diteme</p>
               </div>
             </div>
             <nav className="hidden items-center gap-x-2 md:flex">
@@ -71,7 +71,7 @@ export function HomePageClient() {
                 src="/zebra_hero.png"
                 fill
                 priority
-                alt="Puolingo mascot welcoming learners to practice Setswana"
+                alt="Diteme mascot welcoming learners to practice Setswana"
                 className="animate-float object-contain drop-shadow-2xl"
               />
             </div>
@@ -85,7 +85,7 @@ export function HomePageClient() {
                   Learn Botswana languages online with fun lessons, speaking practice, and culture-rich games.
                 </h1>
                 <p className="mx-auto max-w-[620px] text-lg font-medium leading-8 text-slate-600 lg:mx-0">
-                  Puolingo is a free, engaging way to explore Botswana languages, including Setswana. Practice everyday
+                  Diteme is a free, engaging way to explore Botswana languages, including Setswana. Practice everyday
                   vocabulary, discover culture-rich activities, and build confidence one lesson at a time.
                 </p>
               </div>
@@ -134,7 +134,7 @@ export function HomePageClient() {
         <section className="px-4 pb-8 md:px-8 md:pb-16">
           <div className="mx-auto max-w-6xl rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm md:p-8">
             <div className="max-w-3xl">
-              <p className="text-xs font-bold uppercase tracking-[0.24em] text-emerald-700">Why learners choose Puolingo</p>
+              <p className="text-xs font-bold uppercase tracking-[0.24em] text-emerald-700">Why learners choose Diteme</p>
               <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900">A better way to learn Botswana languages online</h2>
               <p className="mt-3 text-base font-medium leading-7 text-slate-600">
                 The experience is designed to make Botswana languages more approachable for beginners, more enjoyable for
@@ -156,7 +156,7 @@ export function HomePageClient() {
         <section className="px-4 pb-14 md:px-8">
           <div className="mx-auto max-w-6xl rounded-[2rem] border border-emerald-100 bg-[linear-gradient(135deg,_#ecfccb_0%,_#ffffff_45%,_#f8fafc_100%)] p-6 shadow-sm md:p-8">
             <div className="max-w-3xl">
-              <p className="text-xs font-bold uppercase tracking-[0.24em] text-emerald-700">What you can do on Puolingo</p>
+              <p className="text-xs font-bold uppercase tracking-[0.24em] text-emerald-700">What you can do on Diteme</p>
               <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900">Practice the language in more than one way</h2>
             </div>
             <div className="mt-6 grid gap-4 md:grid-cols-3">
@@ -187,7 +187,7 @@ export function HomePageClient() {
       <footer className="border-t-2 border-slate-200 p-4">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 text-center md:flex-row md:text-left">
           <span className="font-bold uppercase text-slate-500">Made for Botswana</span>
-          <span className="text-sm font-bold uppercase text-slate-500">Copyright 2026 Puolingo</span>
+          <span className="text-sm font-bold uppercase text-slate-500">Copyright 2026 Diteme</span>
         </div>
       </footer>
 
@@ -204,3 +204,4 @@ export function HomePageClient() {
     </div>
   );
 }
+

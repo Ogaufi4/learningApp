@@ -24,9 +24,9 @@ export async function sendPasswordResetEmail({ resetUrl, to }: PasswordResetEmai
     body: JSON.stringify({
       from: getResetSender(),
       to: [to],
-      subject: "Reset your Puolingo password",
+      subject: "Reset your Diteme password",
       text: `Reset your password using this link: ${resetUrl}`,
-      html: `<p>Reset your Puolingo password by clicking the link below.</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>If you did not request this, you can ignore this email.</p>`,
+      html: `<p>Reset your Diteme password by clicking the link below.</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>If you did not request this, you can ignore this email.</p>`,
     }),
   });
 
@@ -35,3 +35,4 @@ export async function sendPasswordResetEmail({ resetUrl, to }: PasswordResetEmai
     throw new Error(`Failed to send password reset email: ${errorBody}`);
   }
 }
+

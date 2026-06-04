@@ -27,7 +27,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
           <Image src="/zebra_logo.png" alt="Mascot" height={40} width={40} className="rounded-lg shadow-sm" />
 
           <h1 className="text-2xl font-extrabold tracking-tighter text-[#58cc02]">
-            Puolingo
+            Diteme
           </h1>
         </div>
       </Link>
@@ -66,3 +66,4 @@ export const Sidebar = ({ className }: SidebarProps) => {
     </div>
   );
 };
+

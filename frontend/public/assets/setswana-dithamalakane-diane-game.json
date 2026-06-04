@@ -2,13 +2,13 @@
   "gameTitle": "Setswana Dithamalakane le Diane",
   "language": "tn",
   "version": "1.0.0",
-  "description": "A Puolingo-ready Setswana riddle and proverb quiz game with two categories: Dithamalakane and Diane.",
+  "description": "A Diteme-ready Setswana riddle and proverb quiz game with two categories: Dithamalakane and Diane.",
   "categories": [
     {
       "id": "dithamalakane",
       "title": "Dithamalakane",
       "type": "riddle_game",
-      "instruction": "Buisa lelepa, o tlhophe karabo e e nepagetseng.",
+      "instruction": "Buisa lelepa, o tlhophe karabo e e lebagan                etseng.",
       "items": [
         {"id": 1, "lelepa": "Ka kgwarinya lobota, badimo batla ba ntshetse morago.", "answer": "Ditlhase", "options": ["Ditlhase", "Pula", "Metsi", "Dinaledi"], "imageLabel": "sparks"},
         {"id": 2, "lelepa": "Baloi ba mminamitlwaneng.", "answer": "Marothodi a pula", "options": ["Marothodi a pula", "Ngwedi", "Metsi", "Matlho"], "imageLabel": "rain_drops"},
@@ -86,3 +86,4 @@
     "backToCategories": "Boela kwa dikarolong"
   }
 }
+
