@@ -22,7 +22,10 @@ export default function LoginPage() {
       toast.success("Welcome back!");
       router.push("/learn");
     } catch (error) {
-      const message = (error as { response?: { data?: { detail?: string } } }).response?.data?.detail || "Login failed";
+      const message =
+        (error as { response?: { data?: { detail?: string } } } & Error).response?.data?.detail ||
+        (error as Error).message ||
+        "Login failed";
       toast.error(message);
     }
   };
@@ -33,7 +36,10 @@ export default function LoginPage() {
       toast.success("Welcome back!");
       router.push("/learn");
     } catch (error) {
-      const message = (error as { response?: { data?: { detail?: string } } }).response?.data?.detail || "Google sign-in failed";
+      const message =
+        (error as { response?: { data?: { detail?: string } } } & Error).response?.data?.detail ||
+        (error as Error).message ||
+        "Google sign-in failed";
       toast.error(message);
     }
   };
