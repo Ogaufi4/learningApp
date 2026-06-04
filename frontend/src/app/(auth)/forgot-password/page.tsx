@@ -4,8 +4,26 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { toast } from "sonner";
+import { sendPasswordResetEmail } from "firebase/auth";
 import { Button } from "@/components/ui/button";
-import { authApi } from "@/lib/api/auth";
+import { getFirebaseAuth } from "@/lib/firebase";
+
+function getFirebaseResetErrorMessage(error: unknown) {
+  const authError = error as { code?: string; message?: string };
+
+  switch (authError.code) {
+    case "auth/invalid-email":
+      return "Enter a valid email address.";
+    case "auth/user-not-found":
+      return "No Firebase account exists for that email.";
+    case "auth/unauthorized-domain":
+      return "This domain is not authorized in Firebase. Add this Vercel domain in Firebase Authentication settings.";
+    case "auth/invalid-api-key":
+      return "Firebase API key is invalid. Check the Vercel Firebase environment variables.";
+    default:
+      return authError.message || "We couldn't send the reset email right now.";
+  }
+}
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -16,13 +34,10 @@ export default function ForgotPasswordPage() {
     setIsSubmitting(true);
 
     try {
-      const response = await authApi.forgotPassword({ email });
-      toast.success(response.detail);
+      await sendPasswordResetEmail(getFirebaseAuth(), email.trim());
+      toast.success("If a Firebase account exists for that email, a reset link has been sent.");
     } catch (error) {
-      const message =
-        (error as { response?: { data?: { detail?: string } } }).response?.data?.detail ||
-        "We couldn't start the reset process right now.";
-      toast.error(message);
+      toast.error(getFirebaseResetErrorMessage(error));
     } finally {
       setIsSubmitting(false);
     }
