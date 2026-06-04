@@ -1,5 +1,15 @@
 import apiClient from '../api';
-import type { LoginRequest, RegisterRequest, AuthResponse, User } from '@/types/api';
+import type {
+  LoginRequest,
+  RegisterRequest,
+  AuthResponse,
+  User,
+  GoogleLoginRequest,
+  FirebaseLoginRequest,
+  ForgotPasswordRequest,
+  ResetPasswordRequest,
+  ChangePasswordRequest,
+} from '@/types/api';
 
 export const authApi = {
   // Login with email/password
@@ -28,6 +38,31 @@ export const authApi = {
     const response = await apiClient.post<AuthResponse>('/auth/refresh', {
       refresh_token: refreshToken,
     });
+    return response.data;
+  },
+
+  googleLogin: async (data: GoogleLoginRequest): Promise<AuthResponse> => {
+    const response = await apiClient.post<AuthResponse>('/auth/google', data);
+    return response.data;
+  },
+
+  firebaseLogin: async (data: FirebaseLoginRequest): Promise<AuthResponse> => {
+    const response = await apiClient.post<AuthResponse>('/auth/firebase', data);
+    return response.data;
+  },
+
+  forgotPassword: async (data: ForgotPasswordRequest): Promise<{ detail: string }> => {
+    const response = await apiClient.post<{ detail: string }>('/auth/forgot-password', data);
+    return response.data;
+  },
+
+  resetPassword: async (data: ResetPasswordRequest): Promise<{ detail: string }> => {
+    const response = await apiClient.post<{ detail: string }>('/auth/reset-password', data);
+    return response.data;
+  },
+
+  changePassword: async (data: ChangePasswordRequest): Promise<{ detail: string; user: User }> => {
+    const response = await apiClient.post<{ detail: string; user: User }>('/auth/change-password', data);
     return response.data;
   },
 };

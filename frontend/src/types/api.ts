@@ -6,6 +6,7 @@ export interface User {
   is_active: boolean;
   is_admin: boolean;
   image_src: string | null;
+  has_password: boolean;
   hearts: number;
   points: number;
   xp: number;
@@ -34,6 +35,28 @@ export interface AuthResponse {
   token_type: string;
   refresh_token: string;
   user?: User;
+}
+
+export interface GoogleLoginRequest {
+  id_token: string;
+}
+
+export interface FirebaseLoginRequest {
+  token: string;
+}
+
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  new_password: string;
+}
+
+export interface ChangePasswordRequest {
+  current_password?: string;
+  new_password: string;
 }
 
 // Course types

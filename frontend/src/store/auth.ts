@@ -1,7 +1,18 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+} from 'firebase/auth';
 import type { User, LoginRequest, RegisterRequest } from '@/types/api';
 import { authApi, userApi } from '@/lib/api/auth';
+import { getFirebaseAuth, signInWithGoogle, signOutWithGoogle } from '@/lib/firebase';
+
+function persistAuthSession(accessToken: string, refreshToken: string) {
+  localStorage.setItem('access_token', accessToken);
+  localStorage.setItem('refresh_token', refreshToken);
+}
 
 interface AuthState {
   user: User | null;
@@ -29,9 +40,14 @@ export const useAuthStore = create<AuthState>()(
       login: async (credentials) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await authApi.login(credentials);
-          localStorage.setItem('access_token', response.access_token);
-          localStorage.setItem('refresh_token', response.refresh_token);
+          const credential = await signInWithEmailAndPassword(
+            getFirebaseAuth(),
+            credentials.username,
+            credentials.password
+          );
+          const token = await credential.user.getIdToken();
+          const response = await authApi.firebaseLogin({ token });
+          persistAuthSession(response.access_token, response.refresh_token);
           const user = response.user ?? await userApi.getMe();
           set({ user, isAuthenticated: true, isLoading: false });
         } catch (error: unknown) {
@@ -48,10 +64,17 @@ export const useAuthStore = create<AuthState>()(
       register: async (data) => {
         set({ isLoading: true, error: null });
         try {
-          await authApi.register(data);
-          const response = await authApi.login({ username: data.email, password: data.password });
-          localStorage.setItem('access_token', response.access_token);
-          localStorage.setItem('refresh_token', response.refresh_token);
+          const credential = await createUserWithEmailAndPassword(
+            getFirebaseAuth(),
+            data.email,
+            data.password
+          );
+          if (data.full_name) {
+            await updateProfile(credential.user, { displayName: data.full_name });
+          }
+          const token = await credential.user.getIdToken(true);
+          const response = await authApi.firebaseLogin({ token });
+          persistAuthSession(response.access_token, response.refresh_token);
           const user = response.user ?? await userApi.getMe();
           set({ user, isAuthenticated: true, isLoading: false });
         } catch (error: unknown) {
@@ -65,16 +88,29 @@ export const useAuthStore = create<AuthState>()(
       },
 
       googleLogin: async () => {
-        set({
-          error: 'Google login is not configured in the Next.js-only deployment yet.',
-          isLoading: false,
-        });
-        throw new Error('Google login is not configured in the Next.js-only deployment yet.');
+        set({ isLoading: true, error: null });
+        try {
+          const firebaseUser = await signInWithGoogle();
+          const idToken = await firebaseUser.getIdToken();
+          const response = await authApi.firebaseLogin({ token: idToken });
+          persistAuthSession(response.access_token, response.refresh_token);
+          const user = response.user ?? await userApi.getMe();
+          set({ user, isAuthenticated: true, isLoading: false });
+        } catch (error: unknown) {
+          console.error("Google login attempt failed:", error);
+          const errorMessage = (error as { response?: { data?: { detail?: string } } } & Error).response?.data?.detail || (error as Error).message || 'Google login failed';
+          set({
+            error: errorMessage,
+            isLoading: false,
+          });
+          throw error;
+        }
       },
 
       logout: async () => {
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
+        await signOutWithGoogle().catch(() => undefined);
         set({ user: null, isAuthenticated: false });
       },
 
