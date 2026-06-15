@@ -14,6 +14,39 @@ function persistAuthSession(accessToken: string, refreshToken: string) {
   localStorage.setItem('refresh_token', refreshToken);
 }
 
+function getAuthErrorMessage(error: unknown, fallback: string) {
+  const authError = error as { code?: string; message?: string; response?: { data?: { detail?: string } } };
+  const responseDetail = authError.response?.data?.detail;
+  if (responseDetail) {
+    return responseDetail;
+  }
+
+  switch (authError.code) {
+    case 'auth/unauthorized-domain':
+      return 'This domain is not authorized in Firebase. Add this Vercel domain in Firebase Authentication settings.';
+    case 'auth/popup-closed-by-user':
+      return 'Google sign-in was cancelled before it completed.';
+    case 'auth/popup-blocked':
+      return 'The browser blocked the Google sign-in popup. Allow popups and try again.';
+    case 'auth/invalid-api-key':
+      return 'Firebase API key is invalid. Check the Vercel Firebase environment variables.';
+    case 'auth/configuration-not-found':
+      return 'Firebase Authentication is not configured for this project. Enable Google and Email/Password sign-in in Firebase.';
+    case 'auth/operation-not-allowed':
+      return 'This Firebase sign-in method is not enabled. Enable it in Firebase Authentication.';
+    case 'auth/user-not-found':
+    case 'auth/wrong-password':
+    case 'auth/invalid-credential':
+      return 'Incorrect email or password.';
+    case 'auth/email-already-in-use':
+      return 'An account with this email already exists.';
+    case 'auth/weak-password':
+      return 'Password is too weak. Use a stronger password.';
+    default:
+      return authError.message || fallback;
+  }
+}
+
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
@@ -52,12 +85,12 @@ export const useAuthStore = create<AuthState>()(
           set({ user, isAuthenticated: true, isLoading: false });
         } catch (error: unknown) {
           console.error("Login attempt failed:", error);
-          const errorMessage = (error as { response?: { data?: { detail?: string } } } & Error).response?.data?.detail || (error as Error).message || 'Login failed';
+          const errorMessage = getAuthErrorMessage(error, 'Login failed');
           set({ 
             error: errorMessage,
             isLoading: false 
           });
-          throw error;
+          throw new Error(errorMessage);
         }
       },
 
@@ -79,11 +112,12 @@ export const useAuthStore = create<AuthState>()(
           set({ user, isAuthenticated: true, isLoading: false });
         } catch (error: unknown) {
           console.error(error);
+          const errorMessage = getAuthErrorMessage(error, 'Registration failed');
           set({ 
-            error: (error as Error).message || 'Registration failed',
+            error: errorMessage,
             isLoading: false 
           });
-          throw error;
+          throw new Error(errorMessage);
         }
       },
 
@@ -98,12 +132,12 @@ export const useAuthStore = create<AuthState>()(
           set({ user, isAuthenticated: true, isLoading: false });
         } catch (error: unknown) {
           console.error("Google login attempt failed:", error);
-          const errorMessage = (error as { response?: { data?: { detail?: string } } } & Error).response?.data?.detail || (error as Error).message || 'Google login failed';
+          const errorMessage = getAuthErrorMessage(error, 'Google login failed');
           set({
             error: errorMessage,
             isLoading: false,
           });
-          throw error;
+          throw new Error(errorMessage);
         }
       },
 

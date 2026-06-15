@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { playCachedAudio } from "@/lib/audio";
@@ -20,25 +20,33 @@ type Props = {
   disabled?: boolean;
 };
 
+const shuffle = (items: Item[]) => {
+  const shuffled = [...items];
+
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+
+  return shuffled;
+};
+
+const createColumns = (pairs: Props["pairs"]) => {
+  const sourceItems: Item[] = pairs.map(p => ({ id: p.id, text: p.source, type: "source", pairId: p.id, audioSrc: p.audioSrc }));
+  const targetItems: Item[] = pairs.map(p => ({ id: p.id + 1000, text: p.target, type: "target", pairId: p.id }));
+
+  return {
+    sourceItems: shuffle(sourceItems),
+    targetItems: shuffle(targetItems),
+  };
+};
+
 export const MatchingPairs = ({ pairs, onComplete, disabled }: Props) => {
-  const [items, setItems] = useState<Item[]>([]);
+  const [{ sourceItems, targetItems }] = useState(() => createColumns(pairs));
   const [selectedSource, setSelectedSource] = useState<number | null>(null);
   const [selectedTarget, setSelectedTarget] = useState<number | null>(null);
   const [matchedIds, setMatchedIds] = useState<number[]>([]);
   const [wrongMatch, setWrongMatch] = useState<{ source: number; target: number } | null>(null);
-
-  useEffect(() => {
-    const sourceItems: Item[] = pairs.map(p => ({ id: p.id, text: p.source, type: "source", pairId: p.id, audioSrc: p.audioSrc }));
-    const targetItems: Item[] = pairs.map(p => ({ id: p.id + 1000, text: p.target, type: "target", pairId: p.id }));
-    const combined = [...sourceItems, ...targetItems];
-    
-    // Fisher-Yates shuffle
-    for (let i = combined.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [combined[i], combined[j]] = [combined[j], combined[i]];
-    }
-    setItems(combined);
-  }, [pairs]);
 
   const onSelect = useCallback((item: Item) => {
     if (disabled || matchedIds.includes(item.pairId)) return;
@@ -49,7 +57,7 @@ export const MatchingPairs = ({ pairs, onComplete, disabled }: Props) => {
 
     if (item.type === "source") {
         if (selectedTarget !== null) {
-            const target = items.find(i => i.id === selectedTarget);
+            const target = targetItems.find(i => i.id === selectedTarget);
             if (target && target.pairId === item.pairId) {
                 const newMatched = [...matchedIds, item.pairId];
                 setMatchedIds(newMatched);
@@ -67,7 +75,7 @@ export const MatchingPairs = ({ pairs, onComplete, disabled }: Props) => {
         }
     } else {
         if (selectedSource !== null) {
-            const source = items.find(i => i.id === selectedSource);
+            const source = sourceItems.find(i => i.id === selectedSource);
             if (source && source.pairId === item.pairId) {
                 const newMatched = [...matchedIds, item.pairId];
                 setMatchedIds(newMatched);
@@ -84,11 +92,9 @@ export const MatchingPairs = ({ pairs, onComplete, disabled }: Props) => {
             setSelectedTarget(item.id);
         }
     }
-  }, [disabled, matchedIds, items, selectedSource, selectedTarget, pairs.length, onComplete]);
+  }, [disabled, matchedIds, sourceItems, targetItems, selectedSource, selectedTarget, pairs.length, onComplete]);
 
-  return (
-    <div className="grid grid-cols-2 gap-4">
-      {items.map((item) => {
+  const renderItem = (item: Item) => {
         const isMatched = matchedIds.includes(item.pairId);
         const isSelected = selectedSource === item.id || selectedTarget === item.id;
         const isWrong = wrongMatch?.source === item.id || wrongMatch?.target === item.id;
@@ -112,7 +118,16 @@ export const MatchingPairs = ({ pairs, onComplete, disabled }: Props) => {
             </div>
           </Button>
         );
-      })}
+  };
+
+  return (
+    <div className="grid grid-cols-2 gap-4">
+      <div className="flex flex-col gap-4">
+        {sourceItems.map(renderItem)}
+      </div>
+      <div className="flex flex-col gap-4">
+        {targetItems.map(renderItem)}
+      </div>
     </div>
   );
 };
