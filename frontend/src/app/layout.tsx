@@ -66,9 +66,9 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: "/icon",
-    shortcut: "/icon",
-    apple: "/icon",
+    icon: "/zebra_logo.png",
+    shortcut: "/zebra_logo.png",
+    apple: "/zebra_logo.png",
   },
   category: "education",
 };
