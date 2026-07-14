@@ -106,26 +106,26 @@ export const MatchingPairs = ({ pairs, onComplete, disabled }: Props) => {
             disabled={disabled || isMatched}
             onClick={() => onSelect(item)}
             className={cn(
-              "h-auto py-6 px-4 text-lg border-2 border-b-4 transition-all duration-200",
+              "h-auto min-h-20 min-w-0 whitespace-normal px-3 py-4 text-sm leading-snug sm:px-4 sm:text-base lg:py-5 lg:text-lg border-2 border-b-4 transition-all duration-200",
               isSelected && "border-sky-300 bg-sky-100",
               isMatched && "opacity-0 pointer-events-none",
               isWrong && "border-rose-400 bg-rose-100 animate-shake"
             )}
           >
-            <div className="flex items-center gap-x-2">
-                {item.audioSrc && <Volume2 className="h-4 w-4 text-sky-500" />}
-                {item.text}
+            <div className="flex w-full min-w-0 items-center justify-center gap-x-2 text-center">
+                {item.audioSrc && <Volume2 className="h-4 w-4 shrink-0 text-sky-500" />}
+                <span className="min-w-0 break-words">{item.text}</span>
             </div>
           </Button>
         );
   };
 
   return (
-    <div className="grid grid-cols-2 gap-4">
-      <div className="flex flex-col gap-4">
+    <div className="grid w-full min-w-0 grid-cols-2 gap-3 sm:gap-4">
+      <div className="flex min-w-0 flex-col gap-3 sm:gap-4">
         {sourceItems.map(renderItem)}
       </div>
-      <div className="flex flex-col gap-4">
+      <div className="flex min-w-0 flex-col gap-3 sm:gap-4">
         {targetItems.map(renderItem)}
       </div>
     </div>

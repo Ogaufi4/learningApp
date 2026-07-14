@@ -1,207 +1,269 @@
 "use client";
 
-import Image from "next/image";
+import { ArrowLeft, ArrowRight, ChevronUp } from "lucide-react";
 import { useRouter } from "next/navigation";
+import type { ReactNode } from "react";
 import { useAuthStore } from "@/store/auth";
-import { Button } from "@/components/ui/button";
 
-const featureHighlights = [
-  {
-    title: "Interactive Botswana language lessons",
-    description:
-      "Build vocabulary and confidence with bite-sized practice designed to support learners across Botswana's languages.",
-  },
-  {
-    title: "Culture-led language learning",
-    description:
-      "Practice with phrases, proverbs, and wordplay that reflect Botswana's languages, communities, and identity.",
-  },
-  {
-    title: "Games that reinforce memory",
-    description:
-      "Turn revision into play with challenges that help learners remember words, meanings, and patterns faster.",
-  },
+const photoSheet = "/landing-classroom-grid.png";
+
+const navItems = [
+  { label: "Home", href: "/" },
+  { label: "Courses", href: "/courses" },
+  { label: "Games", href: "/games" },
+  { label: "About Us", href: "#about" },
+  { label: "FAQ", href: "#faq" },
 ];
 
-const seoTopics = [
-  "Learn Botswana languages online at your own pace",
-  "Practice Setswana and other Botswana language skills",
-  "Explore Botswana-inspired language games and activities",
-];
+const courseLinks = ["Setswana", "Pronunciation", "Culture", "Games", "Test Prep"];
+const companyLinks = ["About Us", "Contact Us", "Careers", "Privacy Policy", "Terms of Use"];
+const resourceLinks = ["Courses", "Games", "PuoSpeech", "All Lessons"];
+
+function PhotoBlock({
+  area,
+  className,
+}: {
+  area: "hero" | "teacher" | "classroom" | "study";
+  className: string;
+}) {
+  const positions = {
+    hero: "0% 0%",
+    teacher: "100% 0%",
+    classroom: "0% 100%",
+    study: "100% 100%",
+  };
+
+  return (
+    <div
+      className={`bg-cover bg-no-repeat ${className}`}
+      style={{
+        backgroundImage: `url(${photoSheet})`,
+        backgroundPosition: positions[area],
+        backgroundSize: "200% 200%",
+      }}
+      aria-hidden="true"
+    />
+  );
+}
+
+function SectionKicker({ children }: { children: ReactNode }) {
+  return (
+    <p className="inline-flex items-center gap-4 text-sm font-extrabold text-neutral-950">
+      {children}
+      <span className="h-px w-28 bg-[#b7d94b]" />
+    </p>
+  );
+}
 
 export function HomePageClient() {
   const router = useRouter();
   const { user, logout } = useAuthStore();
 
+  const goPrimary = () => router.push(user ? "/learn" : "/register");
+
   return (
-    <div className="flex min-h-screen flex-col bg-[linear-gradient(180deg,_#f7fee7_0%,_#ffffff_28%,_#f8fafc_100%)]">
-      <header className="sticky top-0 z-50 border-b-2 border-slate-200 bg-white/95 px-4 backdrop-blur md:px-10">
-        <div className="mx-auto flex h-[70px] max-w-6xl items-center justify-between">
-          <div className="flex items-center gap-x-8">
-            <div className="flex items-center gap-x-3">
-              <Image src="/zebra_logo.png" height={40} width={40} alt="Diteme zebra logo" className="rounded-lg" />
-              <div>
-                <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-emerald-600">Botswana Languages</p>
-                <p className="text-2xl font-extrabold tracking-tighter text-[#58cc02]">Diteme</p>
-              </div>
-            </div>
-            <nav className="hidden items-center gap-x-2 md:flex">
-              <Button variant="ghost" className="font-bold text-slate-600 hover:text-emerald-700" onClick={() => router.push("/games")}>
-                Games
-              </Button>
-            </nav>
-          </div>
-          {!user ? (
-            <Button variant="ghost" className="font-bold text-slate-500 hover:text-slate-600" onClick={() => router.push("/login")}>
-              Login
-            </Button>
-          ) : (
-            <Button variant="ghost" className="font-bold text-slate-500 hover:text-slate-600" onClick={() => logout()}>
+    <div className="min-h-screen bg-white font-sans text-neutral-950">
+      <header className="sticky top-0 z-50 bg-white px-5 py-5 md:px-10">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-6">
+          <button className="text-left" onClick={() => router.push("/")} aria-label="Diteme home">
+            <span className="block text-3xl font-black leading-none tracking-tight text-[#a9cf35]">Diteme</span>
+            <span className="block text-[10px] font-bold italic leading-none text-neutral-950">language learning, made local</span>
+          </button>
+
+          <nav className="hidden items-center gap-10 text-xs font-black uppercase tracking-wide md:flex">
+            {navItems.map((item, index) => (
+              <a key={item.label} href={item.href} className={index === 0 ? "text-[#a9cf35]" : "text-neutral-950 hover:text-[#8eb322]"}>
+                {item.label}
+              </a>
+            ))}
+          </nav>
+
+          {user ? (
+            <button
+              className="min-w-24 rounded-full bg-[#b7d94b] px-7 py-3 text-xs font-black uppercase text-white"
+              onClick={() => logout()}
+            >
               Logout
-            </Button>
+            </button>
+          ) : (
+            <button
+              className="min-w-24 rounded-full bg-[#b7d94b] px-7 py-3 text-xs font-black uppercase text-white"
+              onClick={() => router.push("/register")}
+            >
+              Join
+            </button>
           )}
         </div>
       </header>
 
-      <main className="flex-1">
-        <section className="px-4 py-10 md:px-8 md:py-16">
-          <div className="mx-auto flex max-w-6xl flex-col items-center gap-12 lg:flex-row">
-            <div className="relative h-[300px] w-[300px] lg:h-[460px] lg:w-[460px]">
-              <Image
-                src="/zebra_hero.png"
-                fill
-                priority
-                alt="Diteme mascot welcoming learners to practice Setswana"
-                className="animate-float object-contain drop-shadow-2xl"
-              />
-            </div>
+      <main>
+        <section className="mx-auto grid min-h-[calc(100vh-88px)] max-w-6xl items-center gap-12 px-5 py-10 md:grid-cols-[0.82fr_1.18fr] md:px-10 lg:py-4">
+          <div className="max-w-md">
+            <h1 className="text-4xl font-black leading-[1.05] tracking-tight md:text-5xl">
+              Lets Bring the Classroom to You
+            </h1>
+            <div className="mt-3 h-px w-32 bg-[#b7d94b]" />
+            <p className="mt-7 max-w-sm text-sm font-semibold leading-6 text-neutral-600">
+              Learn Botswana languages through structured lessons, speaking practice, and culture-rich games built for
+              steady everyday progress.
+            </p>
+            <button className="mt-7 bg-[#b7d94b] px-9 py-5 text-base font-black text-white" onClick={goPrimary}>
+              {user ? "Continue Learning" : "Get Started"}
+            </button>
+          </div>
 
-            <div className="flex flex-1 flex-col items-center gap-y-7 lg:items-start">
-              <p className="rounded-full bg-emerald-50 px-4 py-2 text-sm font-bold uppercase tracking-[0.22em] text-emerald-700">
-                Language learning for Botswana and beyond
-              </p>
-              <div className="space-y-4 text-center lg:text-left">
-                <h1 className="text-4xl font-extrabold leading-tight text-neutral-900 md:text-6xl">
-                  Learn Botswana languages online with fun lessons, speaking practice, and culture-rich games.
-                </h1>
-                <p className="mx-auto max-w-[620px] text-lg font-medium leading-8 text-slate-600 lg:mx-0">
-                  Diteme is a free, engaging way to explore Botswana languages, including Setswana. Practice everyday
-                  vocabulary, discover culture-rich activities, and build confidence one lesson at a time.
-                </p>
-              </div>
-
-              <div className="flex w-full max-w-[360px] flex-col gap-y-3">
-                {user ? (
-                  <Button size="lg" variant="secondary" className="h-[54px] text-lg" onClick={() => router.push("/learn")}>
-                    Continue Learning
-                  </Button>
-                ) : (
-                  <>
-                    <Button size="lg" variant="secondary" className="h-[54px] text-lg" onClick={() => router.push("/register")}>
-                      Start Learning Free
-                    </Button>
-                    <Button
-                      size="lg"
-                      variant="default"
-                      className="h-[54px] border-2 border-b-4 text-lg"
-                      onClick={() => router.push("/login")}
-                    >
-                      I already have an account
-                    </Button>
-                  </>
-                )}
-                <Button
-                  size="lg"
-                  variant="default"
-                  className="h-[54px] border-2 border-b-4 text-lg"
-                  onClick={() => router.push("/puospeech")}
-                >
-                  Try PuoSpeech
-                </Button>
-              </div>
-
-              <ul className="grid w-full gap-3 text-left text-sm font-semibold text-slate-600 md:grid-cols-3">
-                {seoTopics.map((topic) => (
-                  <li key={topic} className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-                    {topic}
-                  </li>
-                ))}
-              </ul>
+          <div className="relative mx-auto h-[440px] w-full max-w-[620px] md:h-[560px]">
+            <PhotoBlock area="study" className="absolute right-0 top-4 h-[420px] w-[58%] opacity-80" />
+            <div className="absolute left-[9%] top-[44px] h-10 w-10 bg-black" />
+            <PhotoBlock area="hero" className="absolute bottom-8 left-0 h-[420px] w-[76%] border-0" />
+            <div className="absolute bottom-0 right-[4%] flex gap-7 text-[#9fc92e]">
+              <button aria-label="Previous slide">
+                <ArrowLeft size={36} strokeWidth={1.6} />
+              </button>
+              <button aria-label="Next slide">
+                <ArrowRight size={36} strokeWidth={1.6} />
+              </button>
             </div>
           </div>
         </section>
 
-        <section className="px-4 pb-8 md:px-8 md:pb-16">
-          <div className="mx-auto max-w-6xl rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm md:p-8">
-            <div className="max-w-3xl">
-              <p className="text-xs font-bold uppercase tracking-[0.24em] text-emerald-700">Why learners choose Diteme</p>
-              <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900">A better way to learn Botswana languages online</h2>
-              <p className="mt-3 text-base font-medium leading-7 text-slate-600">
-                The experience is designed to make Botswana languages more approachable for beginners, more enjoyable for
-                returning speakers, and more visible to learners everywhere.
-              </p>
-            </div>
+        <section id="about" className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-24 md:grid-cols-2 md:px-10">
+          <div className="relative h-[470px]">
+            <div className="absolute left-0 top-0 h-[82%] w-[82%] border-[3px] border-black" />
+            <PhotoBlock area="teacher" className="absolute bottom-0 right-0 h-[82%] w-[86%]" />
+          </div>
 
-            <div className="mt-8 grid gap-5 md:grid-cols-3">
-              {featureHighlights.map((feature) => (
-                <article key={feature.title} className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
-                  <h3 className="text-xl font-extrabold text-slate-900">{feature.title}</h3>
-                  <p className="mt-3 text-sm font-medium leading-6 text-slate-600">{feature.description}</p>
-                </article>
+          <div className="max-w-md md:pl-8">
+            <SectionKicker>About us</SectionKicker>
+            <h2 className="mt-7 text-4xl font-black tracking-tight">Diteme</h2>
+            <p className="mt-8 text-sm font-bold leading-8 text-neutral-700">
+              Diteme is a free education portal for Botswana languages. We believe language learning should feel clear,
+              local, and accessible to learners anywhere.
+            </p>
+            <p className="mt-7 text-sm font-bold leading-8 text-neutral-700">
+              The platform combines guided lessons, pronunciation practice, and playful revision tools so learners can
+              study at their own pace and build confidence one session at a time.
+            </p>
+          </div>
+        </section>
+
+        <section className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-24 md:grid-cols-[0.7fr_1.3fr] md:px-10">
+          <div className="max-w-sm">
+            <SectionKicker>What we do best</SectionKicker>
+            <h2 className="mt-7 text-4xl font-black tracking-tight">Our Courses</h2>
+            <p className="mt-24 text-sm font-semibold leading-8 text-neutral-600 md:mt-28">
+              Browse well structured lessons and practice paths that help you improve vocabulary, listening, speaking,
+              and cultural understanding.
+            </p>
+            <button className="mt-8 bg-[#b7d94b] px-8 py-4 text-base font-black text-white" onClick={() => router.push("/courses")}>
+              View all Courses
+            </button>
+          </div>
+
+          <div className="relative h-[460px]">
+            <PhotoBlock area="study" className="absolute left-[42%] top-0 h-[260px] w-[34%]" />
+            <div className="absolute left-[34%] top-[96px] h-[210px] w-[36%] border-[3px] border-black" />
+            <PhotoBlock area="classroom" className="absolute bottom-16 left-0 h-[290px] w-[66%]" />
+            <PhotoBlock area="teacher" className="absolute bottom-0 right-0 h-[260px] w-[34%]" />
+          </div>
+        </section>
+
+        <section className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-24 md:grid-cols-[0.9fr_1.1fr] md:px-10">
+          <div className="max-w-md md:pl-32">
+            <SectionKicker>What they say</SectionKicker>
+            <h2 className="mt-7 text-4xl font-black tracking-tight">People Gossip</h2>
+            <div className="mt-16 flex gap-5">
+              <span className="text-7xl font-black leading-none text-neutral-200">&quot;</span>
+              <div>
+                <p className="text-sm font-bold leading-7 text-neutral-800">
+                  Diteme helped me keep practicing Setswana between classes. The short lessons and games made revision
+                  easier to come back to every day.
+                </p>
+                <p className="mt-7 text-right text-lg font-black">~ Kabo M.</p>
+              </div>
+            </div>
+          </div>
+          <div className="relative h-[470px]">
+            <PhotoBlock area="study" className="absolute inset-y-0 left-0 my-auto h-[430px] w-[78%]" />
+            <button className="absolute -left-12 top-1/2 hidden -translate-y-1/2 md:block" aria-label="Previous testimonial">
+              <ArrowLeft size={38} strokeWidth={1.8} />
+            </button>
+            <button className="absolute right-0 top-1/2 -translate-y-1/2" aria-label="Next testimonial">
+              <ArrowRight size={38} strokeWidth={1.8} />
+            </button>
+            <div className="absolute bottom-0 left-0 flex gap-3">
+              {[0, 1, 2, 3, 4].map((dot) => (
+                <span key={dot} className={`h-5 w-5 rounded-full border-2 border-[#b7d94b] ${dot === 0 ? "bg-[#b7d94b]" : "bg-white"}`} />
               ))}
             </div>
           </div>
         </section>
 
-        <section className="px-4 pb-14 md:px-8">
-          <div className="mx-auto max-w-6xl rounded-[2rem] border border-emerald-100 bg-[linear-gradient(135deg,_#ecfccb_0%,_#ffffff_45%,_#f8fafc_100%)] p-6 shadow-sm md:p-8">
-            <div className="max-w-3xl">
-              <p className="text-xs font-bold uppercase tracking-[0.24em] text-emerald-700">What you can do on Diteme</p>
-              <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900">Practice the language in more than one way</h2>
-            </div>
-            <div className="mt-6 grid gap-4 md:grid-cols-3">
-              <article className="rounded-[1.5rem] border border-white/70 bg-white/85 p-5">
-                <h3 className="text-lg font-extrabold text-slate-900">Learn core vocabulary</h3>
-                <p className="mt-2 text-sm font-medium leading-6 text-slate-600">
-                  Follow guided lessons that introduce useful words and phrases from Botswana languages in a simple,
-                  repeatable flow.
-                </p>
-              </article>
-              <article className="rounded-[1.5rem] border border-white/70 bg-white/85 p-5">
-                <h3 className="text-lg font-extrabold text-slate-900">Improve pronunciation</h3>
-                <p className="mt-2 text-sm font-medium leading-6 text-slate-600">
-                  Use PuoSpeech to experiment with speaking practice and support listening-based language growth.
-                </p>
-              </article>
-              <article className="rounded-[1.5rem] border border-white/70 bg-white/85 p-5">
-                <h3 className="text-lg font-extrabold text-slate-900">Play cultural language games</h3>
-                <p className="mt-2 text-sm font-medium leading-6 text-slate-600">
-                  Explore proverbs, riddles, and Botswana-inspired challenges that make revision feel active and memorable.
-                </p>
-              </article>
-            </div>
+        <section id="faq" className="mx-auto grid max-w-6xl items-center px-5 py-24 md:grid-cols-[1fr_1fr] md:px-10">
+          <PhotoBlock area="classroom" className="relative z-10 h-[420px] w-full md:w-[108%]" />
+          <div className="relative -ml-0 border-[3px] border-black px-9 py-12 md:-ml-8 md:pl-28">
+            <SectionKicker>Contact us</SectionKicker>
+            <h2 className="mt-7 text-4xl font-black tracking-tight">Get In Touch</h2>
+            <form className="mt-9 max-w-sm space-y-7">
+              <label className="block text-sm font-black">
+                Full Name
+                <input className="mt-4 block w-full border-0 border-b-2 border-neutral-700 bg-transparent px-0 py-2 outline-none" />
+              </label>
+              <label className="block text-sm font-black">
+                Email
+                <input className="mt-4 block w-full border-0 border-b-2 border-neutral-700 bg-transparent px-0 py-2 outline-none" />
+              </label>
+              <label className="block text-sm font-black">
+                Message
+                <textarea className="mt-4 block min-h-20 w-full resize-none border-0 border-b-2 border-neutral-700 bg-transparent px-0 py-2 outline-none" />
+              </label>
+              <button type="button" className="bg-[#b7d94b] px-9 py-4 text-base font-black text-white">
+                Send
+              </button>
+            </form>
           </div>
         </section>
       </main>
 
-      <footer className="border-t-2 border-slate-200 p-4">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 text-center md:flex-row md:text-left">
-          <span className="font-bold uppercase text-slate-500">Made for Botswana</span>
-          <span className="text-sm font-bold uppercase text-slate-500">Copyright 2026 Diteme</span>
+      <footer className="bg-[#fafafa] px-5 pb-8 pt-14 md:px-10">
+        <div className="mx-auto grid max-w-6xl gap-10 border-b border-neutral-200 pb-12 md:grid-cols-[1.2fr_1fr_1fr_1fr_1fr]">
+          <div>
+            <p className="text-3xl font-black leading-none tracking-tight text-[#a9cf35]">Diteme</p>
+            <p className="text-[10px] font-bold italic text-neutral-950">language learning, made local</p>
+          </div>
+          <FooterColumn title="Company" links={companyLinks} />
+          <FooterColumn title="Courses" links={courseLinks} />
+          <FooterColumn title="Resources" links={resourceLinks} />
+          <div>
+            <h3 className="text-lg font-black uppercase text-[#a9cf35]">Socials</h3>
+            <div className="mt-4 flex gap-4 text-2xl font-black text-black">
+              <span>f</span>
+              <span>ig</span>
+              <span>x</span>
+              <span>g+</span>
+            </div>
+          </div>
+        </div>
+        <div className="mx-auto mt-7 flex max-w-6xl items-center justify-center text-sm font-bold text-[#a9cf35]">
+          <p>Copyright 2026 Diteme</p>
+          <button className="fixed bottom-8 right-8 rounded-full bg-[#b7d94b] p-3 text-white" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} aria-label="Back to top">
+            <ChevronUp size={20} />
+          </button>
         </div>
       </footer>
-
-      <style jsx global>{`
-        @keyframes float {
-          0% { transform: translateY(0px); }
-          50% { transform: translateY(-20px); }
-          100% { transform: translateY(0px); }
-        }
-        .animate-float {
-          animation: float 4s ease-in-out infinite;
-        }
-      `}</style>
     </div>
   );
 }
 
+function FooterColumn({ title, links }: { title: string; links: string[] }) {
+  return (
+    <div>
+      <h3 className="text-lg font-black uppercase text-[#a9cf35]">{title}</h3>
+      <ul className="mt-4 space-y-2 text-sm font-bold text-neutral-950">
+        {links.map((link) => (
+          <li key={link}>{link}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}

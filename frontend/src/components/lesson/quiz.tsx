@@ -121,6 +121,9 @@ export const Quiz = ({
     } else if (challenge.type === "TRANSLATE" || challenge.type === "LISTEN_TYPE" || challenge.type === "TAP_HEAR" || challenge.type === "SPEAK") {
         if (challenge.type === "SPEAK" && selectedOption === "SKIPPED") {
             isCorrect = true;
+        } else if ((challenge.type === "TRANSLATE" || challenge.type === "TAP_HEAR") && !challenge.correct_text?.trim()) {
+            const correctOption = options.find((option) => option.correct);
+            isCorrect = correctOption?.id === selectedOption;
         } else {
             // Simple string comparison, normalizing case and whitespace
             const normalizedAnswer = String(selectedOption).toLowerCase().trim()
@@ -269,6 +272,7 @@ export const Quiz = ({
               </div>
 
               <ChallengeComponent
+                key={`${challenge.id}-${status}`}
                 options={options}
                 onSelect={onSelect}
                 status={status}
@@ -276,6 +280,7 @@ export const Quiz = ({
                 disabled={pending}
                 type={challenge.type}
                 question={challenge.question}
+                correctText={challenge.correct_text}
                 audioSrc={challenge.audio_src}
               />
             </div>

@@ -15,6 +15,7 @@ type Props = {
   disabled?: boolean;
   type: string;
   question: string;
+  correctText?: string;
   audioSrc?: string;
 };
 
@@ -26,11 +27,34 @@ export const ChallengeComponent = ({
   disabled,
   type,
   question,
+  correctText,
   audioSrc,
 }: Props) => {
   const isImageSelect = type === "SELECT_IMAGE";
 
   if (type === "TRANSLATE" || type === "TAP_HEAR") {
+    if (!correctText?.trim()) {
+      return (
+        <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(200px,1fr))]">
+          {options.map((option, index) => (
+            <Card
+              key={option.id}
+              id={option.id}
+              text={option.text}
+              imageSrc={option.image_src}
+              shortcut={`${index + 1}`}
+              selected={selectedOption === option.id}
+              onClick={() => onSelect(option.id)}
+              status={status}
+              audioSrc={option.audio_src}
+              disabled={disabled}
+              type={type}
+            />
+          ))}
+        </div>
+      );
+    }
+
     // Treat as sentence builder
     const words = options.map(o => o.text);
     return (
