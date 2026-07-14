@@ -70,7 +70,7 @@ export default function CoursesPage() {
         />
       </StickyWrapper>
       <FeedWrapper>
-        <div className="w-full flex flex-col items-center">
+        <div className="flex w-full flex-col items-center rounded-[2rem] border border-[#e4d7c5] bg-[#fffdf7] p-8 shadow-sm">
           <Image
             src="/learn.svg"
             alt="Learn"
@@ -78,7 +78,8 @@ export default function CoursesPage() {
             width={90}
             className="mb-6"
           />
-          <h1 className="text-center font-bold text-neutral-800 text-2xl mb-7">
+          <p className="mb-3 text-xs font-black uppercase tracking-[0.24em] text-[#9a4f2b]">Courses</p>
+          <h1 className="mb-7 text-center text-2xl font-black text-[#17181f]">
             Choose a course to start learning
           </h1>
 
@@ -96,8 +97,8 @@ export default function CoursesPage() {
                   href={`/course/${course.id}`}
                   className="group"
                 >
-                  <div className="border-2 rounded-xl border-b-4 hover:bg-black/5 cursor-pointer active:border-b-2 flex flex-col items-center gap-3 p-6 pb-8 min-h-[217px] min-w-[200px] transition">
-                    <div className="relative aspect-[4/3] w-[120px] rounded-lg overflow-hidden drop-shadow-md">
+                  <div className="flex min-h-[217px] min-w-[200px] cursor-pointer flex-col items-center gap-3 rounded-[1.5rem] border border-[#e4d7c5] bg-white p-6 pb-8 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+                    <div className="relative aspect-[4/3] w-[120px] overflow-hidden rounded-2xl border border-[#dfc3a9]">
                       {(course.image_src && !brokenImages[course.id]) ? (
                         <Image
                           src={formatAssetUrl(course.image_src) || ""}
@@ -117,11 +118,11 @@ export default function CoursesPage() {
                         />
                       )}
                     </div>
-                    <p className="text-neutral-700 text-center font-bold text-lg">
+                    <p className="text-center text-lg font-black text-[#17181f]">
                       {course.title}
                     </p>
                     {course.description && (
-                      <p className="text-neutral-500 text-center text-sm">
+                      <p className="text-center text-sm font-semibold text-[#6f675d]">
                         {course.description}
                       </p>
                     )}

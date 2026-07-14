@@ -45,23 +45,30 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#f0f2f5] p-4 font-sans">
-      <Link href="/" className="flex items-center gap-x-3 mb-12 hover:opacity-80 transition group">
-        <Image src="/zebra_logo.png" height={50} width={50} alt="Logo" className="rounded-xl shadow-lg border-2 border-white group-hover:scale-110 transition duration-300" />
-        <h1 className="text-4xl font-extrabold text-[#58cc02] tracking-tighter">
-          Diteme
-        </h1>
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#f7f1e4] p-4 font-sans text-[#17181f]">
+      <div className="pointer-events-none absolute right-0 top-0 h-72 w-72 rounded-bl-[7rem] border-b border-l border-[#b86a3a]/25" />
+      <div className="pointer-events-none absolute bottom-0 left-0 h-48 w-80 border-t border-[#2f3a24]/20 bg-[#2f3a24]/5" />
+
+      <Link href="/" className="relative mb-10 flex items-center gap-x-3 transition hover:opacity-80">
+        <Image src="/zebra_logo.png" height={54} width={54} alt="Diteme logo" className="rounded-2xl border border-white/80 bg-white p-1 shadow-[0_14px_35px_rgba(80,48,28,0.12)]" />
+        <div>
+          <h1 className="text-4xl font-black lowercase tracking-tight text-[#17181f]">
+            diteme
+          </h1>
+          <p className="text-sm font-semibold text-[#6b5b4e]">Learn. Speak. Belong.</p>
+        </div>
       </Link>
 
-      <div className="w-full max-w-md bg-white rounded-3xl p-8 border-2 border-slate-200">
+      <div className="relative w-full max-w-md rounded-[2rem] border border-[#e3d4bf] bg-[#fffdf7] p-8 shadow-[0_24px_80px_rgba(64,44,28,0.12)]">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-neutral-800 tracking-tight">Login</h2>
-          <p className="text-neutral-500 mt-2 font-medium">Continue your language journey</p>
+          <p className="mb-3 text-xs font-black uppercase tracking-[0.28em] text-[#9a4f2b]">Welcome back</p>
+          <h2 className="text-3xl font-black tracking-tight text-[#17181f]">Login</h2>
+          <p className="mt-2 font-semibold text-[#6f675d]">Continue your language journey</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-bold text-neutral-600 uppercase tracking-wide">
+            <label htmlFor="email" className="text-sm font-black uppercase tracking-wide text-[#4f463f]">
               Email
             </label>
             <input
@@ -70,17 +77,17 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-4 bg-slate-100 border-2 border-slate-200 rounded-2xl focus:outline-none focus:border-[#58cc02] transition font-medium"
+              className="w-full rounded-2xl border-2 border-[#e2d4c2] bg-[#f8f2e8] px-4 py-4 font-semibold text-[#17181f] placeholder:text-[#a89b8b] transition focus:border-[#9a4f2b] focus:bg-white focus:outline-none"
               placeholder="Enter your email"
             />
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <label htmlFor="password" className="text-sm font-bold text-neutral-600 uppercase tracking-wide">
+              <label htmlFor="password" className="text-sm font-black uppercase tracking-wide text-[#4f463f]">
                 Password
               </label>
-              <Link href="/forgot-password" className="text-xs font-bold uppercase tracking-wide text-[#58cc02] hover:underline">
+              <Link href="/forgot-password" className="text-xs font-black uppercase tracking-wide text-[#4f9a42] hover:underline">
                 Forgot password?
               </Link>
             </div>
@@ -90,7 +97,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full px-4 py-4 bg-slate-100 border-2 border-slate-200 rounded-2xl focus:outline-none focus:border-[#58cc02] transition font-medium"
+              className="w-full rounded-2xl border-2 border-[#e2d4c2] bg-[#f8f2e8] px-4 py-4 font-semibold text-[#17181f] placeholder:text-[#a89b8b] transition focus:border-[#9a4f2b] focus:bg-white focus:outline-none"
               placeholder="Enter password"
             />
           </div>
@@ -106,16 +113,16 @@ export default function LoginPage() {
         </form>
 
         <div className="my-6 flex items-center gap-3">
-          <div className="h-px flex-1 bg-slate-200" />
-          <span className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">or</span>
-          <div className="h-px flex-1 bg-slate-200" />
+          <div className="h-px flex-1 bg-[#e4d7c5]" />
+          <span className="text-xs font-black uppercase tracking-[0.2em] text-[#a89b8b]">or</span>
+          <div className="h-px flex-1 bg-[#e4d7c5]" />
         </div>
 
         <Button
           type="button"
           disabled={isLoading}
           variant="outline"
-          className="w-full h-[54px] text-sm font-bold text-slate-700"
+          className="w-full h-[54px] text-sm font-black text-[#2a231f]"
           onClick={handleGoogleLogin}
         >
           <svg aria-hidden="true" viewBox="0 0 24 24" className="mr-3 h-5 w-5">
@@ -127,9 +134,9 @@ export default function LoginPage() {
           Continue with Google
         </Button>
 
-        <p className="mt-8 text-center text-neutral-500 font-medium">
+        <p className="mt-8 text-center font-semibold text-[#6f675d]">
           Don&apos;t have an account?{" "}
-          <Link href="/register" className="text-[#58cc02] font-bold hover:underline">
+          <Link href="/register" className="font-black text-[#4f9a42] hover:underline">
             Sign up
           </Link>
         </p>

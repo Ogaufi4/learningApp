@@ -10,10 +10,11 @@ type UnitBannerProps = {
 
 export const UnitBanner = ({ title, description, locked }: UnitBannerProps) => {
   return (
-    <div className={`flex w-full items-center justify-between rounded-xl p-5 text-white ${locked ? "bg-neutral-400" : "bg-green-500"}`}>
+    <div className={`flex w-full items-center justify-between rounded-[1.5rem] border p-5 shadow-sm ${locked ? "border-[#d8ccbc] bg-[#e9e2d6] text-[#7c7062]" : "border-[#d9c3a8] bg-[#fffdf7] text-[#17181f]"}`}>
       <div className="space-y-2.5">
-        <h3 className="text-2xl font-bold">{title}</h3>
-        <p className="text-lg">{description}</p>
+        <p className="text-xs font-black uppercase tracking-[0.24em] text-[#9a4f2b]">Course unit</p>
+        <h3 className="text-2xl font-black">{title}</h3>
+        <p className="text-base font-semibold text-[#6f675d]">{description}</p>
       </div>
 
       {!locked && (

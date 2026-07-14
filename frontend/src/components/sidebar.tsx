@@ -18,16 +18,16 @@ export const Sidebar = ({ className }: SidebarProps) => {
   return (
     <div
       className={cn(
-        "left-0 top-0 flex h-full flex-col border-r-2 px-4 lg:fixed lg:w-[256px]",
+        "left-0 top-0 flex h-full flex-col border-r border-[#e4d7c5] bg-[#fffdf7] px-4 shadow-[12px_0_40px_rgba(64,44,28,0.05)] lg:fixed lg:w-[256px]",
         className
       )}
     >
       <Link href="/learn">
         <div className="flex items-center gap-x-3 pb-7 pl-4 pt-8">
-          <Image src="/zebra_logo.png" alt="Mascot" height={40} width={40} className="rounded-lg shadow-sm" />
+          <Image src="/zebra_logo.png" alt="Mascot" height={42} width={42} className="rounded-xl border border-[#eadbc7] bg-white p-1 shadow-sm" />
 
-          <h1 className="text-2xl font-extrabold tracking-tighter text-[#58cc02]">
-            Diteme
+          <h1 className="text-2xl font-black lowercase tracking-tight text-[#17181f]">
+            diteme
           </h1>
         </div>
       </Link>
@@ -46,8 +46,8 @@ export const Sidebar = ({ className }: SidebarProps) => {
       <div className="p-4">
         {user ? (
           <div className="flex items-center gap-x-2">
-            <div className="flex-1">
-              <p className="text-sm font-medium truncate">{user.full_name || user.email}</p>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-bold text-[#4f463f]">{user.full_name || user.email}</p>
             </div>
             <Button
               onClick={logout}

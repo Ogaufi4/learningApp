@@ -22,10 +22,10 @@ export const UserProgress = ({
   hasActiveSubscription,
 }: UserProgressProps) => {
   return (
-    <div className="flex w-full items-center justify-between gap-x-2">
+    <div className="flex w-full items-center justify-between gap-x-2 rounded-[1.5rem] border border-[#e4d7c5] bg-[#fffdf7] p-3 shadow-sm">
       <Link href="/courses">
         <Button variant="ghost">
-          <div className="relative aspect-[4/3] w-10 overflow-hidden rounded-md border">
+          <div className="relative aspect-[4/3] w-10 overflow-hidden rounded-xl border border-[#dfc3a9]">
             <Image
               src={formatAssetUrl(activeCourse.imageSrc) || "/es.svg"}
               alt={activeCourse.title}
@@ -36,7 +36,7 @@ export const UserProgress = ({
         </Button>
       </Link>
 
-      <Button variant="ghost" className="cursor-default text-orange-500 hover:bg-transparent">
+      <Button variant="ghost" className="cursor-default text-[#9a4f2b] hover:bg-transparent">
         <Image
           src="/points.svg"
           height={28}
@@ -47,7 +47,7 @@ export const UserProgress = ({
         {points}
       </Button>
 
-      <Button variant="ghost" className="cursor-default text-rose-500 hover:bg-transparent">
+      <Button variant="ghost" className="cursor-default text-[#4f9a42] hover:bg-transparent">
         <Image
           src="/heart.svg"
           height={22}

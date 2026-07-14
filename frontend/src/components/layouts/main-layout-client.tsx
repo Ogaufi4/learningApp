@@ -27,7 +27,7 @@ export function MainLayoutClient({ children }: Props) {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-[#fbf7ef] text-[#17181f]">
       <MobileHeader />
       <Sidebar className="hidden lg:flex" />
       <main className="h-full pt-[50px] lg:pl-[256px] lg:pt-0">
