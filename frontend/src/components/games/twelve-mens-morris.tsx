@@ -89,11 +89,6 @@ function playTone(enabled: boolean, frequency: number, duration = 0.12) {
   oscillator.stop(context.currentTime + duration);
 }
 
-function generateRoomCode() {
-  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  return Array.from({ length: 6 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
-}
-
 function readRoomSession() {
   if (typeof window === "undefined") {
     return null;
@@ -209,9 +204,14 @@ export function TwelveMensMorrisGame() {
       return;
     }
 
-    setPlayMode("multiplayer");
-    setRoomCodeInput(roomFromUrl.toUpperCase());
-    setStatusMessage(`Invite detected for room ${roomFromUrl.toUpperCase()}. Enter your name and tap Join Room.`);
+    const normalizedRoomCode = roomFromUrl.toUpperCase();
+    const timeoutId = window.setTimeout(() => {
+      setPlayMode("multiplayer");
+      setRoomCodeInput(normalizedRoomCode);
+      setStatusMessage(`Invite detected for room ${normalizedRoomCode}. Enter your name and tap Join Room.`);
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, []);
 
   useEffect(() => {
@@ -451,7 +451,7 @@ export function TwelveMensMorrisGame() {
 
   return (
     <div className="space-y-8">
-      <div className="rounded-[2rem] border border-emerald-100 bg-[radial-gradient(circle_at_top_left,_rgba(187,247,208,0.7),_rgba(255,255,255,1)_55%)] p-8 shadow-sm">
+      <div className="rounded-[2rem] border border-amber-200 bg-white p-8 shadow-sm">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
             <div className="mb-4 flex items-center gap-3">
@@ -460,12 +460,12 @@ export function TwelveMensMorrisGame() {
               </div>
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.24em] text-emerald-700">Diteme Games</p>
-                <p className="text-sm font-semibold text-slate-500">Play with friends or side-by-side</p>
+                <p className="text-sm font-semibold text-slate-500">Traditional board strategy</p>
               </div>
             </div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Play Twelve Men&apos;s Morris inside Diteme</h1>
+            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Play Mohele inside Diteme</h1>
             <p className="mt-3 text-base font-medium text-slate-600">
-              Start a local match or create a private room with an invite code so a second player can join.
+              Start a local match or create a private room, then move pieces across a carved wooden Mohele board.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
@@ -539,10 +539,40 @@ export function TwelveMensMorrisGame() {
       ) : null}
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <Card className="overflow-hidden rounded-[2rem] border-slate-200 shadow-sm">
-          <CardContent className="p-4 sm:p-6">
-            <div className="mx-auto max-w-[720px] rounded-[1.75rem] bg-slate-950 p-4 sm:p-6">
-              <svg viewBox="0 0 100 100" className="aspect-square w-full">
+        <Card className="overflow-hidden rounded-[1.25rem] border-[#3a2117] bg-[#3a2117] shadow-[0_18px_36px_rgba(41,24,18,0.24)]">
+          <CardContent className="p-3 sm:p-4">
+            <div className="mx-auto max-w-[720px] rounded-[0.85rem] border-[10px] border-[#2f1b13] bg-[#2f1b13] p-2 shadow-[inset_0_0_0_2px_rgba(255,255,255,0.08)] sm:border-[14px] sm:p-3">
+              <svg viewBox="0 0 100 100" className="aspect-square w-full rounded-sm">
+                <defs>
+                  <linearGradient id="moheleWood" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0%" stopColor="#e7c78a" />
+                    <stop offset="42%" stopColor="#c99555" />
+                    <stop offset="100%" stopColor="#f0d39a" />
+                  </linearGradient>
+                  <pattern id="moheleGrain" width="14" height="100" patternUnits="userSpaceOnUse">
+                    <path d="M2 0 C5 18 0 32 4 50 C8 68 1 82 5 100" fill="none" stroke="#8b5a2b" strokeOpacity="0.2" strokeWidth="0.65" />
+                    <path d="M10 0 C7 20 13 36 9 54 C5 72 12 88 8 100" fill="none" stroke="#fff5cf" strokeOpacity="0.18" strokeWidth="0.5" />
+                  </pattern>
+                  <filter id="pieceShadow" x="-35%" y="-35%" width="170%" height="170%">
+                    <feDropShadow dx="0.9" dy="1.3" stdDeviation="1.1" floodColor="#2f1b13" floodOpacity="0.42" />
+                  </filter>
+                  <radialGradient id="yellowPiece" cx="35%" cy="28%" r="70%">
+                    <stop offset="0%" stopColor="#fff8a6" />
+                    <stop offset="48%" stopColor="#f5b616" />
+                    <stop offset="100%" stopColor="#9f5f00" />
+                  </radialGradient>
+                  <radialGradient id="bluePiece" cx="35%" cy="28%" r="70%">
+                    <stop offset="0%" stopColor="#86d7ff" />
+                    <stop offset="48%" stopColor="#0c83c5" />
+                    <stop offset="100%" stopColor="#06405f" />
+                  </radialGradient>
+                </defs>
+                <rect x="0" y="0" width="100" height="100" fill="url(#moheleWood)" />
+                <rect x="0" y="0" width="100" height="100" fill="url(#moheleGrain)" />
+                <rect x="3" y="3" width="94" height="94" fill="none" stroke="#5a321d" strokeWidth="1.4" opacity="0.5" />
+                <text x="50" y="10" textAnchor="middle" className="select-none fill-[#3f2516] text-[6px] font-bold tracking-[0.04em]">
+                  Mohele
+                </text>
                 {CONNECTIONS.map(([from, to]) => (
                   <line
                     key={`${from}-${to}`}
@@ -550,9 +580,10 @@ export function TwelveMensMorrisGame() {
                     y1={BOARD_POINTS[from].y}
                     x2={BOARD_POINTS[to].x}
                     y2={BOARD_POINTS[to].y}
-                    stroke="#94a3b8"
-                    strokeWidth="1.5"
+                    stroke="#6b4324"
+                    strokeWidth="0.65"
                     strokeLinecap="round"
+                    opacity="0.72"
                   />
                 ))}
                 {BOARD_POINTS.map((point, index) => {
@@ -567,7 +598,9 @@ export function TwelveMensMorrisGame() {
                           cx={point.x}
                           cy={point.y}
                           r="5.8"
-                          fill={state.removingPiece ? "rgba(248,113,113,0.25)" : "rgba(74,222,128,0.26)"}
+                          fill={state.removingPiece ? "rgba(127,29,29,0.18)" : "rgba(255,255,255,0.28)"}
+                          stroke={state.removingPiece ? "#7f1d1d" : "#f8e0a2"}
+                          strokeWidth="0.45"
                         />
                       ) : null}
                       {isEmpty ? (
@@ -575,45 +608,51 @@ export function TwelveMensMorrisGame() {
                           <circle
                             cx={point.x}
                             cy={point.y}
-                            r="2.15"
-                            fill="#dbe4f3"
-                            stroke={isHighlighted ? "#4ade80" : "#334155"}
-                            strokeWidth={isHighlighted ? "0.95" : "0.75"}
+                            r="2.35"
+                            fill="#2b1a10"
+                            stroke={isHighlighted ? "#f7d269" : "#8b5a2b"}
+                            strokeWidth={isHighlighted ? "0.8" : "0.45"}
                             className="cursor-pointer"
                             onClick={() => onPointClick(index)}
                           />
                           <circle
-                            cx={point.x}
-                            cy={point.y}
-                            r="0.82"
-                            fill={isHighlighted ? "#86efac" : "#0f172a"}
+                            cx={point.x - 0.55}
+                            cy={point.y - 0.55}
+                            r="0.65"
+                            fill={isHighlighted ? "#fff3bd" : "#0f0905"}
+                            opacity="0.8"
                             pointerEvents="none"
                           />
                         </>
                       ) : (
-                        <circle
-                          cx={point.x}
-                          cy={point.y}
-                          r="3.8"
-                          fill={piece === 1 ? "#38bdf8" : "#fb7185"}
-                          stroke={isSelected ? "#fde047" : "#0f172a"}
-                          strokeWidth={isSelected ? "1.4" : "1"}
-                          className="cursor-pointer"
-                          onClick={() => onPointClick(index)}
-                        />
+                        <g filter="url(#pieceShadow)" className="cursor-pointer" onClick={() => onPointClick(index)}>
+                          <circle
+                            cx={point.x}
+                            cy={point.y}
+                            r="4.1"
+                            fill={piece === 1 ? "url(#yellowPiece)" : "url(#bluePiece)"}
+                            stroke={isSelected ? "#fff7ad" : "#3a2117"}
+                            strokeWidth={isSelected ? "1.4" : "0.7"}
+                          />
+                          <circle
+                            cx={point.x - 1.2}
+                            cy={point.y - 1.2}
+                            r="1"
+                            fill="#ffffff"
+                            opacity="0.72"
+                            pointerEvents="none"
+                          />
+                        </g>
                       )}
-                      {piece !== 0 ? (
-                        <circle
-                          cx={point.x - 0.7}
-                          cy={point.y - 0.7}
-                          r="1.25"
-                          fill={piece === 1 ? "#e0f2fe" : "#ffe4e6"}
-                          pointerEvents="none"
-                        />
-                      ) : null}
                     </g>
                   );
                 })}
+                <text x="7" y="95" className="select-none fill-[#4b2d1a] text-[2.5px] font-semibold">
+                  A strategy game played on Diteme
+                </text>
+                <text x="72" y="95" className="select-none fill-[#4b2d1a] text-[2.2px] font-semibold">
+                  Yellow vs Blue
+                </text>
               </svg>
             </div>
           </CardContent>
@@ -648,15 +687,15 @@ export function TwelveMensMorrisGame() {
               </div>
               <p className="text-sm font-medium leading-6 text-slate-600">{state.lastAction}</p>
               <div className="grid gap-3">
-                <div className="rounded-2xl bg-sky-50 p-4">
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-sky-700">
+                <div className="rounded-2xl bg-yellow-50 p-4">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-yellow-700">
                     {playMode === "multiplayer" ? roomSnapshot?.hostName || "Player One" : "Player One"}
                   </p>
                   <p className="mt-2 text-sm font-semibold text-slate-700">Pieces to place: {state.unplacedPieces[0]}</p>
                   <p className="text-sm font-semibold text-slate-700">Pieces on board: {state.boardPieces[0]}</p>
                 </div>
-                <div className="rounded-2xl bg-rose-50 p-4">
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-rose-700">
+                <div className="rounded-2xl bg-sky-50 p-4">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-sky-700">
                     {playMode === "multiplayer" ? roomSnapshot?.guestName || "Waiting for join" : "Player Two"}
                   </p>
                   <p className="mt-2 text-sm font-semibold text-slate-700">Pieces to place: {state.unplacedPieces[1]}</p>
@@ -674,7 +713,7 @@ export function TwelveMensMorrisGame() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm font-medium leading-6 text-slate-600">
-              <p>Players first place all 12 pieces one at a time. Every line of three forms a mill and lets you remove an opposing piece.</p>
+              <p>Mohele is played with 12 pieces per player. Every line of three forms a mill and lets you remove an opposing piece.</p>
               <p>Once all pieces are placed, select one of your pieces and move it along a connected line to an empty point.</p>
               <p>If you are reduced to three pieces, you can jump to any empty point on the board.</p>
               <p>Win by reducing your opponent below three active pieces or by blocking every legal move.</p>

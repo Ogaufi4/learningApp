@@ -37,7 +37,7 @@ export default function SetswanaGamesPage() {
             Diane le Dithamalakane
           </h1>
           <p className="mt-3 text-base font-medium leading-7 text-slate-600">
-            Tlhopha karolo e o batlang go simolola ka yone. Fa o batla go tshameka Mohele, e fitlhele mo Twelve Men's Morris ka fa ntle ga hub eno.
+            Tlhopha karolo e o batlang go simolola ka yone. Fa o batla go tshameka Mohele, e fitlhele mo lenaaneng la metshameko.
           </p>
         </div>
       </div>

@@ -17,9 +17,9 @@ const games = [
   },
   {
     href: "/games/morris",
-    title: "Twelve Men's Morris",
+    title: "Mohele",
     description:
-      "Local two-player board game e o ka e tshamekang mo sesebedisweng se le sengwe ka go aba ditshono.",
+      "Motshameko wa board wa setso o o ka o tshamekang mo sesebedisweng se le sengwe kgotsa le tsala mo room.",
     badge: "Board Game",
     icon: Swords,
     accentClassName: "bg-emerald-100 text-emerald-800",
