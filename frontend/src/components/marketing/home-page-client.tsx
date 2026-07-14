@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowLeft, ArrowRight, ChevronUp } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { useAuthStore } from "@/store/auth";
@@ -48,10 +49,10 @@ function PhotoBlock({
 
 function SectionKicker({ children }: { children: ReactNode }) {
   return (
-    <p className="inline-flex items-center gap-4 text-sm font-extrabold text-neutral-950">
-      {children}
-      <span className="h-px w-28 bg-[#b7d94b]" />
-    </p>
+    <div className="inline-flex flex-col items-start">
+      <p className="text-sm font-extrabold text-neutral-950">{children}</p>
+      <span className="mt-2 h-px w-28 bg-[#b7d94b]" />
+    </div>
   );
 }
 
@@ -65,9 +66,12 @@ export function HomePageClient() {
     <div className="min-h-screen bg-white font-sans text-neutral-950">
       <header className="sticky top-0 z-50 bg-white px-5 py-5 md:px-10">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-6">
-          <button className="text-left" onClick={() => router.push("/")} aria-label="Diteme home">
-            <span className="block text-3xl font-black leading-none tracking-tight text-[#a9cf35]">Diteme</span>
-            <span className="block text-[10px] font-bold italic leading-none text-neutral-950">language learning, made local</span>
+          <button className="flex items-center gap-3 text-left" onClick={() => router.push("/")} aria-label="Diteme home">
+            <Image src="/zebra_logo.png" alt="" width={48} height={48} priority className="h-12 w-12 object-contain" />
+            <span>
+              <span className="block text-3xl font-black leading-none tracking-tight text-[#a9cf35]">Diteme</span>
+              <span className="block text-[10px] font-bold italic leading-none text-neutral-950">language learning, made local</span>
+            </span>
           </button>
 
           <nav className="hidden items-center gap-10 text-xs font-black uppercase tracking-wide md:flex">
@@ -116,6 +120,15 @@ export function HomePageClient() {
             <PhotoBlock area="study" className="absolute right-0 top-4 h-[420px] w-[58%] opacity-80" />
             <div className="absolute left-[9%] top-[44px] h-10 w-10 bg-black" />
             <PhotoBlock area="hero" className="absolute bottom-8 left-0 h-[420px] w-[76%] border-0" />
+            <div className="absolute bottom-20 right-[8%] z-20 flex h-[150px] w-[150px] items-center justify-center bg-white p-4 shadow-[0_0_0_3px_#000] md:h-[190px] md:w-[190px]">
+              <Image
+                src="/zebra_hero.png"
+                fill
+                priority
+                alt="Diteme zebra mascot welcoming learners"
+                className="object-contain p-3"
+              />
+            </div>
             <div className="absolute bottom-0 right-[4%] flex gap-7 text-[#9fc92e]">
               <button aria-label="Previous slide">
                 <ArrowLeft size={36} strokeWidth={1.6} />
@@ -227,9 +240,12 @@ export function HomePageClient() {
 
       <footer className="bg-[#fafafa] px-5 pb-8 pt-14 md:px-10">
         <div className="mx-auto grid max-w-6xl gap-10 border-b border-neutral-200 pb-12 md:grid-cols-[1.2fr_1fr_1fr_1fr_1fr]">
-          <div>
-            <p className="text-3xl font-black leading-none tracking-tight text-[#a9cf35]">Diteme</p>
-            <p className="text-[10px] font-bold italic text-neutral-950">language learning, made local</p>
+          <div className="flex items-center gap-3">
+            <Image src="/zebra_logo.png" alt="" width={44} height={44} className="h-11 w-11 object-contain" />
+            <div>
+              <p className="text-3xl font-black leading-none tracking-tight text-[#a9cf35]">Diteme</p>
+              <p className="text-[10px] font-bold italic text-neutral-950">language learning, made local</p>
+            </div>
           </div>
           <FooterColumn title="Company" links={companyLinks} />
           <FooterColumn title="Courses" links={courseLinks} />
