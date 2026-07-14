@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { StickyWrapper } from "@/components/sticky-wrapper";
 import { UserProgress } from "@/components/user-progress";
-import { Promo } from "@/components/promo";
-import { Quests } from "@/components/quests";
 import { FeedWrapper } from "@/components/feed-wrapper";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
@@ -23,7 +21,6 @@ export default function LeaderboardPage() {
 
   useEffect(() => {
     if (!user) {
-      setLoading(false);
       return;
     }
 
@@ -59,8 +56,6 @@ export default function LeaderboardPage() {
           points={user.points}
           hasActiveSubscription={false}
         />
-        <Promo />
-        <Quests points={user.points} streakCount={user.streak_count} />
       </StickyWrapper>
       <FeedWrapper>
         <div className="w-full flex flex-col items-center">

@@ -7,8 +7,6 @@ import { Camera, Loader2 } from "lucide-react";
 
 import { StickyWrapper } from "@/components/sticky-wrapper";
 import { UserProgress } from "@/components/user-progress";
-import { Promo } from "@/components/promo";
-import { Quests } from "@/components/quests";
 import { FeedWrapper } from "@/components/feed-wrapper";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuthStore } from "@/store/auth";
@@ -147,8 +145,6 @@ export default function ProfilePage() {
           points={user.points}
           hasActiveSubscription={false}
         />
-        <Promo />
-        <Quests points={user.points} streakCount={user.streak_count} />
       </StickyWrapper>
       <FeedWrapper>
         <div className="w-full flex flex-col items-center">

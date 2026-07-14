@@ -7,10 +7,8 @@ import type { Course } from "@/types/api";
 import { FeedWrapper } from "@/components/feed-wrapper";
 import { StickyWrapper } from "@/components/sticky-wrapper";
 import { UserProgress } from "@/components/user-progress";
-import { Promo } from "@/components/promo";
-import { Quests } from "@/components/quests";
 import { toast } from "sonner";
-import { cn, formatAssetUrl } from "@/lib/utils";
+import { formatAssetUrl } from "@/lib/utils";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -70,8 +68,6 @@ export default function CoursesPage() {
           points={user.points}
           hasActiveSubscription={false}
         />
-        <Promo />
-        <Quests points={user.points} streakCount={user.streak_count} />
       </StickyWrapper>
       <FeedWrapper>
         <div className="w-full flex flex-col items-center">

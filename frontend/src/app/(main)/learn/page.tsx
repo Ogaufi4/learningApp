@@ -6,8 +6,6 @@ import { useCourseStore } from "@/store/course";
 import { FeedWrapper } from "@/components/feed-wrapper";
 import { StickyWrapper } from "@/components/sticky-wrapper";
 import { UserProgress } from "@/components/user-progress";
-import { Promo } from "@/components/promo";
-import { Quests } from "@/components/quests";
 import { Header } from "@/components/learn/header";
 import { Unit } from "@/components/learn/unit";
 import { useRouter } from "next/navigation";
@@ -60,8 +58,6 @@ export default function LearnPage() {
           points={user.points}
           hasActiveSubscription={false}
         />
-        <Promo />
-        <Quests points={user.points} streakCount={user.streak_count} />
       </StickyWrapper>
       <FeedWrapper>
         <Header title={course.title} />
