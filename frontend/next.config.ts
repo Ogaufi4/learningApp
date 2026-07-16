@@ -44,6 +44,29 @@ uploadRemotePatterns.push({
   pathname: "/**",
 });
 
+const r2PublicBaseUrl = process.env.R2_PUBLIC_BASE_URL;
+const parsedR2PublicBaseUrl = r2PublicBaseUrl
+  ? (() => {
+      try {
+        return new URL(r2PublicBaseUrl);
+      } catch {
+        return null;
+      }
+    })()
+  : null;
+
+if (
+  parsedR2PublicBaseUrl &&
+  (parsedR2PublicBaseUrl.protocol === "http:" || parsedR2PublicBaseUrl.protocol === "https:")
+) {
+  uploadRemotePatterns.push({
+    protocol: parsedR2PublicBaseUrl.protocol.slice(0, -1) as "http" | "https",
+    hostname: parsedR2PublicBaseUrl.hostname,
+    port: parsedR2PublicBaseUrl.port || "",
+    pathname: "/**",
+  });
+}
+
 const nextConfig: NextConfig = {
   output: "standalone",
   images: {
