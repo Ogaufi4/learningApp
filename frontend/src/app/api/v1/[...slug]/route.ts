@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import bcrypt from "bcryptjs";
+import { randomUUID } from "crypto";
 import { type NextRequest, NextResponse } from "next/server";
 import type { TransactionSql } from "postgres";
 import { validatePassword } from "@/lib/auth/password";
@@ -8,7 +9,7 @@ import { sendPasswordResetEmail } from "@/lib/server/email";
 import { verifyFirebaseIdToken } from "@/lib/server/firebase-auth";
 import { ensureAppSchema, getSql, sql } from "@/lib/server/db";
 import { createPasswordResetToken, getPasswordResetUrl, hashPasswordResetToken } from "@/lib/server/reset-password";
-import { uploadPublicFile } from "@/lib/server/storage";
+import { uploadJsonObject, uploadPublicFile, uploadTextObject } from "@/lib/server/storage";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -80,6 +81,10 @@ function parseOptionalNumber(value: unknown) {
 
 function normalizeEmail(value: string) {
   return value.trim().toLowerCase();
+}
+
+function sanitizeObjectPathSegment(value: string) {
+  return value.replace(/[^a-zA-Z0-9._-]/g, "-") || randomUUID();
 }
 
 function getErrorMessage(error: unknown, fallback: string) {
@@ -262,6 +267,17 @@ async function readMultipartFile(request: NextRequest) {
   }
 
   return file;
+}
+
+async function readMultipartFileAndFields(request: NextRequest) {
+  const formData = await request.formData();
+  const file = formData.get("file") ?? formData.get("audio");
+
+  if (!(file instanceof File)) {
+    throw new Error("A file is required");
+  }
+
+  return { file, formData };
 }
 
 async function getCurrentUser(request: NextRequest, requireAuth = true) {
@@ -1222,6 +1238,59 @@ async function handlePost(request: NextRequest, slug: string[]) {
       where id = ${user.id}
     `;
     return json({ status: "streak frozen" });
+  }
+
+  if (slug[0] === "contributions") {
+    const { file, formData } = await readMultipartFileAndFields(request);
+
+    if (!isAudioFile(file)) {
+      return errorResponse("Invalid file type. Upload an audio file.", 400);
+    }
+
+    const contributionId = sanitizeObjectPathSegment(String(formData.get("contribution_id") || randomUUID()));
+    const text = String(
+      formData.get("text") ??
+        formData.get("transcript") ??
+        formData.get("sentence") ??
+        formData.get("translation") ??
+        ""
+    ).trim();
+    const submittedAt = new Date().toISOString();
+    const fields = Object.fromEntries(
+      Array.from(formData.entries())
+        .filter(([, value]) => typeof value === "string")
+        .map(([key, value]) => [key, value])
+    );
+
+    const audio = await uploadPublicFile(file, "contributions", { contributionId });
+    const metadata = await uploadJsonObject(
+      {
+        id: contributionId,
+        submitted_at: submittedAt,
+        audio: {
+          filename: audio.filename,
+          path: audio.path,
+          url: audio.url,
+          content_type: file.type || "application/octet-stream",
+          size: file.size,
+        },
+        text,
+        fields,
+      },
+      "contributions",
+      "metadata.json",
+      { contributionId }
+    );
+    const textObject = text
+      ? await uploadTextObject(text, "contributions", "text.txt", { contributionId })
+      : null;
+
+    return json({
+      id: contributionId,
+      audio,
+      metadata,
+      text: textObject,
+    });
   }
 
   if (slug[0] === "users" && slug[1] === "upload") {
